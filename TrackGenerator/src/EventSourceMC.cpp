@@ -79,7 +79,7 @@ void EventSourceMC::loadGeometry(const std::string & fileName){
 }
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
-TVector3 EventSourceMC::createVertex() const{
+TVector3 EventSourceMC::`() const{
 
   double x = 0.0, y = 0.0, z = 0.0;
 
@@ -316,10 +316,12 @@ void EventSourceMC::generateEvent(){
 
   myTracks3D.clear();
   
-  double aRndm = myRndm.Uniform(0,1);
-  if(aRndm<0.33) generateSingleProng();
-  else if (aRndm<2*0.33) generateTwoProng();
-  else generateThreeProng();
+  generateTwoProng();
+  
+  //double aRndm = myRndm.Uniform(0,1);
+  //if(aRndm<0.33) generateSingleProng();
+  //else if (aRndm<2*0.33) generateTwoProng();
+  //else generateThreeProng();
   
   for(const auto & aTrack: myTracks3D) fillPEventTPC(my3DChargeCloud, aTrack);
   fillEventTPC();
