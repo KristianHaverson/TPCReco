@@ -21,6 +21,7 @@
 #include "InputFileHelper.h"
 #include "MakeUniqueName.h"
 #include "colorText.h"
+#include "TLorentzVector.h"
 
 #include "EventTPC.h"
 /////////////////////////////////////
@@ -142,7 +143,9 @@ typedef struct {Float_t eventId, frameId,
     alphaRangeReco,
     alphaEnergyReco,
     chargeReco,
-    cosThetaReco, phiReco;
+    cosThetaReco, phiReco,
+    ///
+    genVertexX,genVertexY,genVertexZ;
     } TrackData;
 /////////////////////////
 int makeTrackTree(const  std::string & geometryFileName, const  std::string & dataFileName) {
@@ -158,7 +161,8 @@ int makeTrackTree(const  std::string & geometryFileName, const  std::string & da
   std::string leafNames = "";
   leafNames += "eventId:frameId:";
   leafNames += "eventTypeGen:alphaRangeGen:alphaEnergyGen:chargeGen:cosThetaGen:phiGen:";  
-  leafNames += "eventTypeReco:alphaRangeReco:alphaEnergyReco:chargeReco:cosThetaReco:phiReco";
+  leafNames += "eventTypeReco:alphaRangeReco:alphaEnergyReco:chargeReco:cosThetaReco:phiReco:";
+  leafNames += "genVertexX:genVertexY:genVertexZ";
   tree->Branch("track",&track_data,leafNames.c_str());
 
   // ** GEOMETRY ** //
@@ -175,7 +179,8 @@ int makeTrackTree(const  std::string & geometryFileName, const  std::string & da
   std::size_t last_slash_position = fileName.find_last_of("//");
   std::string recoFileName = MakeUniqueName("Reco_"+fileName.substr(last_slash_position+1,last_dot_position-last_slash_position-1)+".root");
   std::shared_ptr<eventraw::EventInfo> myEventInfo = std::make_shared<eventraw::EventInfo>();
-  RecoOutput myRecoOutput.open(recoFileName);
+  RecoOutput myRecoOutput;
+  myRecoOutput.open(recoFileName);
   
   // ** LOAD DATA ** //
   myEventSource->loadDataFile(dataFileName);
@@ -183,7 +188,7 @@ int makeTrackTree(const  std::string & geometryFileName, const  std::string & da
 
   // ** MAIN LOOP ** //
   unsigned int nEntries = myEventSource->numberOfEntries();
-  nEntries = 10; //TEST
+  nEntries = 2500; //TEST
 
   for(unsigned int iEntry=0;iEntry<nEntries;++iEntry){
 
@@ -212,6 +217,8 @@ int makeTrackTree(const  std::string & geometryFileName, const  std::string & da
     track_data.cosThetaGen = -tangentGen.X();
     track_data.phiGen = atan2(-tangentGen.Z(), tangentGen.Y());
 
+
+
     track_data.eventTypeReco = aTrack3DReco.getSegments().front().getPID() + +aTrack3DReco.getSegments().back().getPID();    
     track_data.alphaRangeReco =  aTrack3DReco.getSegments().front().getLength();    
     track_data.alphaEnergyReco = track_data.alphaRangeReco>0 ? myRangeCalculator.getIonEnergyMeV(pid_type::ALPHA, track_data.alphaRangeReco):0.0;
@@ -219,6 +226,13 @@ int makeTrackTree(const  std::string & geometryFileName, const  std::string & da
     const TVector3 & tangentReco = aTrack3DReco.getSegments().front().getTangent();
     track_data.cosThetaReco = -tangentReco.X();
     track_data.phiReco = atan2(-tangentReco.Z(), tangentReco.Y());
+
+    TVector3  genVertexPos = aTrack3DGen.getSegments().front().getVertexPos();
+    track_data.genVertexX = genVertexPos.X();
+    track_data.genVertexY = genVertexPos.Y();
+    track_data.genVertexZ = genVertexPos.Z();
+    std::cout<<"-> "<<genVertexPos.X()<<" "<<genVertexPos.Y()<<" "<<genVertexPos.Z();
+
 
     
     tree->Fill();    

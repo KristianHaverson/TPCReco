@@ -11,6 +11,9 @@
 #include "UVWprojector.h"
 #include "Track3D.h"
 #include "IonRangeCalculator.h"
+#include "TLorentzVector.h"
+#include "TLorentzRotation.h"
+
 
 class EventSourceMC: public EventSourceBase {
   
@@ -56,6 +59,7 @@ public:
   pid_type myGenEventType;
 
   TVector3 createVertex() const;
+  TrackSegment3D createLorentzSegment(const TVector3 vertexPos, pid_type ion_id) const;  
   TrackSegment3D createSegment(const TVector3 vertexPos, pid_type ion_id) const;  
   TH1F createChargeProfile(double ion_range, pid_type ion_id) const;  
   Track3D createTrack(const TVector3 & aVtx, pid_type ion_id) const;
@@ -69,8 +73,9 @@ public:
   void generateEvent();
 
   
-  
-  
+  void Boost2Lab(TVector3 &tangent, pid_type ion_id)const;
+  double boostTheta(double thetaCM);
+  double boostPhi(double phiCM);
   
 };
 #endif

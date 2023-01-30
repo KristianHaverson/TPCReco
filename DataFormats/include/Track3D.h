@@ -72,7 +72,7 @@ class Track3D{
   void splitSegment(unsigned int iSegment,  double lengthFraction);
 
   void update();
-
+ 
  private:
 
   void updateChi2();

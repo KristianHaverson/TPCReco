@@ -98,6 +98,15 @@ class TrackSegment3D{
   ///Operator needed for fitting.
   double operator() (const double *par);
 
+   //!
+  TVector3 getVertexPos()const {return myVertexPos;}
+  void setVertexPos(const TVector3& newPos){myVertexPos = newPos;}
+  
+  //!
+
+
+
+
  private:
 
   ///Return point on 2D projection for stripPitchDirection corresponding to given lambda.
@@ -120,6 +129,7 @@ class TrackSegment3D{
 
   std::vector<Hit2DCollection> myRecHits;
   std::vector<double> myProjectionsChi2;
+  TVector3 myVertexPos;
 };
 
 std::ostream & operator << (std::ostream &out, const TrackSegment3D &aSegment);

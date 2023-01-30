@@ -2,7 +2,9 @@
 
 #include "colorText.h"
 #include "EventSourceMC.h"
-
+#include "TLorentzVector.h"
+#include "TLorentzRotation.h"
+#include "CommonDefinitions.h"
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
 EventSourceMC::EventSourceMC(const std::string & geometryFileName) {
@@ -18,6 +20,7 @@ EventSourceMC::EventSourceMC(const std::string & geometryFileName) {
   double nominalPressure = 250.0; //[mbar]
   braggGraph_alpha_energy = 10; // [MeV]
   braggGraph_12C_energy = 5; // [MeV]
+  //double gammaEnergy = 13.1; // [MeV]
 
   keVToChargeScale = 100.0; // 1 keV = 100 charge in arb. units
   
@@ -77,15 +80,7 @@ void EventSourceMC::loadGeometry(const std::string & fileName){
   EventSourceBase::loadGeometry(fileName);
   myProjectorPtr.reset(new UVWprojector(myGeometryPtr));
 }
-/////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////
-TVector3 EventSourceMC::`() const{
 
-  double x = 0.0, y = 0.0, z = 0.0;
-
-  TVector3 aVertex(x,y,z);
-  return aVertex;
-}
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
 TrackSegment3D EventSourceMC::createSegment(const TVector3 vertexPos, pid_type ion_id) const{
@@ -95,6 +90,8 @@ TrackSegment3D EventSourceMC::createSegment(const TVector3 vertexPos, pid_type i
   double minCosTheta = -1, maxCosTheta = 1;
   double minPhi = 0, maxPhi = 2*M_PI;
   double minLength = 20, maxLength = 60;
+
+
 
   if(ion_id==pid_type::ALPHA){
     minLength = 20;
@@ -146,6 +143,143 @@ TrackSegment3D EventSourceMC::createSegment(const TVector3 vertexPos, pid_type i
 }
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
+
+
+//!------------------------------------------------------
+TVector3 EventSourceMC::createVertex() const{
+
+  double x = 0.0, y = 0.0, z = 0.0;
+
+  std::random_device rd; // Seed random number
+  std::mt19937 gen1(rd());
+  std::mt19937 gen2(rd());
+  std::mt19937 gen3(rd());
+  double xmin=-150;
+  double xmax=150;
+  std::uniform_real_distribution<> dis(xmin, xmax);
+  std::normal_distribution<> disGaus(0, 3);
+  
+  x = dis(gen1); 
+  y = disGaus(gen2);
+  z = disGaus(gen3);
+  std::cout<<"-> "<<x<<" "<<y<<" "<<z<<std::endl;
+
+
+
+  TVector3 aVertex(x,y,z);
+  return aVertex;
+}
+//!------------------------------------------------------
+
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+
+//!------------------------------------------------------
+void EventSourceMC::Boost2Lab(TVector3 &tangent, pid_type ion_id)const{
+ 
+  const double AMU = 931.49410242; // MeV/c^2
+  const double alphaMass  = 4.003*AMU ;
+  const double oxygenMass = 16.0*AMU; 
+  const double carbonMass = 12.0*AMU; 
+
+  TVector3 beamDir_LAB(-1, 0, 0); // unit vector
+  double beamEnergy = 11.9;
+
+
+  TLorentzVector p4_beam_LAB(beamDir_LAB.Unit()*beamEnergy, beamEnergy); // [MeV/c, MeV/c, MeV/c, MeV/c^2]
+  TLorentzVector p4_target_LAB(0, 0, 0, oxygenMass); // [MeV/c, MeV/c, MeV/c, MeV/c^2]
+  TLorentzVector p4_total =  p4_beam_LAB + p4_target_LAB;
+  
+  TVector3 boost_LAB_to_CMS = p4_total.BoostVector(); 
+  TLorentzRotation rot_LAB_to_CMS(-boost_LAB_to_CMS);
+
+
+
+  if(ion_id==pid_type::ALPHA){
+    TLorentzVector alpha_LAB(tangent,alphaMass);
+    TLorentzVector alpha_CMS = rot_LAB_to_CMS*alpha_LAB;
+    tangent = alpha_CMS.Vect();
+  
+
+
+  } 
+  else if(ion_id==pid_type::C_12 ){
+   TLorentzVector carbon_LAB(tangent,carbonMass);
+    TLorentzVector carbon_CMS = rot_LAB_to_CMS*carbon_LAB;
+    tangent = carbon_CMS.Vect();
+
+  }
+  
+
+
+}
+//!------------------------------------------------------
+
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+
+
+//!------------------------------------------------------
+TrackSegment3D EventSourceMC::createLorentzSegment(const TVector3 vertexPos, pid_type ion_id) const{
+
+  double length = 60;
+  double theta = 0, phi = 0.0;
+  double minCosTheta = -1, maxCosTheta = 1;
+  double minPhi = 0, maxPhi = 2*M_PI;
+  double minLength = 20, maxLength = 60;
+
+
+  if(ion_id==pid_type::ALPHA){
+    minLength = 20;
+    maxLength = 60;    
+  } 
+  else if(ion_id==pid_type::C_12 && myTracks3D.size()==1){
+    minLength = 10;
+    maxLength = 15;
+    const TVector3 &aTangent = -myTracks3D.front().getSegments().front().getTangent();
+    minPhi = aTangent.Phi()-0.1;
+    maxPhi = aTangent.Phi()+0.1;
+    minCosTheta = cos(aTangent.Theta())-0.1;
+    maxCosTheta = cos(aTangent.Theta())+0.1;
+    if(minCosTheta<-1) minCosTheta = -1.0;
+    if(maxCosTheta>1) maxCosTheta = 1.0;
+ 
+  }
+  
+  theta = TMath::ACos(myRndm.Uniform(minCosTheta, maxCosTheta));
+  phi =myRndm.Uniform(minPhi, maxPhi);
+  length = myRndm.Uniform(minLength, maxLength);
+
+
+  
+ 
+  TVector3 tangent;
+  tangent.SetMagThetaPhi(1.0, theta, phi);
+  std::cout<<"====================="<<std::endl;
+  std::cout<<"====================="<<std::endl;
+  std::cout<<"OLD -> ";
+  tangent.Print();
+  Boost2Lab(tangent,ion_id);
+  std::cout<<std::endl<<"NEW -> ";
+  tangent.Print();
+  std::cout<<std::endl;
+  std::cout<<"====================="<<std::endl;
+  std::cout<<"====================="<<std::endl;
+
+
+
+  TrackSegment3D aSegment;
+  aSegment.setGeometry(myGeometryPtr);
+  aSegment.setStartEnd(vertexPos, vertexPos + tangent*length);
+  aSegment.setPID(ion_id);
+  
+  return aSegment;
+}
+//!------------------------------------------------------
+
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+
 TH1F EventSourceMC::createChargeProfile(double ion_range, pid_type ion_id) const{
   
   double dEdx_max_energy =0.0, graph_range = 0.0;
@@ -179,17 +313,25 @@ TH1F EventSourceMC::createChargeProfile(double ion_range, pid_type ion_id) const
   std::cout<<KBLU<<"Ion energy from range calculator [keV]: \t"<<RST<<myRangeCalculator.getIonEnergyMeV(ion_id, ion_range)*1E3<<std::endl;
   return aChargeProfile;
 }
+
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
+
+//!------------------------------------------------------
+
 Track3D EventSourceMC::createTrack(const TVector3 & aVtx, pid_type ion_id) const{
+//Track3D EventSourceMC::createTrack(const TVector3 & aVtx,const TVector3 boost, pid_type ion_id) const{
 
   Track3D aTrack;
-  TrackSegment3D aSegment = createSegment(aVtx, ion_id);
+  TrackSegment3D aSegment = createLorentzSegment(aVtx, ion_id);
+  aSegment.setVertexPos(aVtx);
   TH1F hChargeProfile = createChargeProfile(aSegment.getLength(), ion_id);
   aTrack.addSegment(aSegment);
   aTrack.setChargeProfile(hChargeProfile);
   return aTrack;
 }
+//!------------------------------------------------------
+
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
 void EventSourceMC::fill3DChargeCloud(const Track3D & aTrack){
@@ -270,22 +412,35 @@ void EventSourceMC::generateSingleProng(pid_type ion_id){
 }
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
+
+
+//!------------------------------------------------------
 void EventSourceMC::generateTwoProng(){
 
   myGenEventType = CARBON_12;
 
+
   pid_type ion_id_first = pid_type::ALPHA;
   pid_type ion_id_second = pid_type::CARBON_12;
   TVector3 aVtx = createVertex();
+  
+ // TLorentzVector LorzentBoost = getBoost();
 
   myTracks3D.push_back(createTrack(aVtx, ion_id_first));
+  //myTracks3D.push_back(createTrack(aVtx,LorzBoost, ion_id_first));
   std::cout<<KBLU<<"First generated track: "<<RST<<std::endl;
   std::cout<<myTracks3D.back()<<std::endl;
 
   myTracks3D.push_back(createTrack(aVtx, ion_id_second));
+  //myTracks3D.push_back(createTrack(aVtx,LorzBoost, ion_id_second));
   std::cout<<KBLU<<"Second generated track: "<<RST<<std::endl;
   std::cout<<myTracks3D.back()<<std::endl;
+
+
+
 }
+//!------------------------------------------------------
+
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
 void EventSourceMC::generateThreeProng(){
