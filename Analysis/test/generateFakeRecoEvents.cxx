@@ -404,7 +404,7 @@ Track3D generateFakeAlphaCarbonGenericEvent(std::shared_ptr<GeometryTPC> aGeomet
   double beamEnergyResolution=SIMUL_BEAM_E_RESOL; // LAB beam energy smearing factor
   double beamEnergy_DET=photonEnergyMeV*r->Gaus(1, beamEnergyResolution); // smear beam energy by 5% // MeV
   TVector3 beamDir_DET(-1, 0, 0); // unit vector
-  beamDir_DET.RotateZ(SIMUL_BEAM_TILT_ANGLE); // apply beam tilt
+  beamDir_DET.RotatfeZ(SIMUL_BEAM_TILT_ANGLE); // apply beam tilt
   TLorentzVector photonP4_DET(beamDir_DET.Unit()*beamEnergy_DET, beamEnergy_DET); // [MeV/c, MeV/c, MeV/c, MeV/c^2]
   TLorentzVector oxygenP4_DET(0, 0, 0, oxygenMass); // [MeV/c, MeV/c, MeV/c, MeV/c^2]
 
