@@ -13,6 +13,7 @@
 #include "IonRangeCalculator.h"
 #include "TLorentzVector.h"
 #include "TLorentzRotation.h"
+#include "IonRangeCalculator.h"
 
 
 class EventSourceMC: public EventSourceBase {
@@ -59,10 +60,11 @@ public:
   pid_type myGenEventType;
 
   TVector3 createVertex() const;
-  TrackSegment3D createLorentzSegment(const TVector3 vertexPos, pid_type ion_id) const;  
+  TrackSegment3D createLorentzSegment(const TVector3 vertexPos, pid_type ion_id,TVector3 &aTangentNonBoost) const;  
   TrackSegment3D createSegment(const TVector3 vertexPos, pid_type ion_id) const;  
   TH1F createChargeProfile(double ion_range, pid_type ion_id) const;  
   Track3D createTrack(const TVector3 & aVtx, pid_type ion_id) const;
+  Track3D createTrack(const TVector3 & aVtx, pid_type ion_id,TVector3 &aTangentNonBoost) const;
 
   void generateSingleProng(pid_type ion_id=pid_type::ALPHA);
   void generateTwoProng();
@@ -73,10 +75,11 @@ public:
   void generateEvent();
 
   
-  void Boost2Lab(TVector3 &tangent, pid_type ion_id)const;
+  double Boost2Lab(double const length,TVector3 &tangent, pid_type ion_id)const;
   double boostTheta(double thetaCM);
   double boostPhi(double phiCM);
-  
+  double SRIMtrackLength(const double gammaEnergy, const double pressure, pid_type ion_id)const;
+
 };
 #endif
 
