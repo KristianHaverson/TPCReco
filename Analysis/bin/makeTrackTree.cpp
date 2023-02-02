@@ -188,7 +188,7 @@ int makeTrackTree(const  std::string & geometryFileName, const  std::string & da
 
   // ** MAIN LOOP ** //
   unsigned int nEntries = myEventSource->numberOfEntries();
-  nEntries = 2500; //TEST
+  nEntries = 10000; //TEST
 
   for(unsigned int iEntry=0;iEntry<nEntries;++iEntry){
 
@@ -231,7 +231,7 @@ int makeTrackTree(const  std::string & geometryFileName, const  std::string & da
     track_data.genVertexX = genVertexPos.X();
     track_data.genVertexY = genVertexPos.Y();
     track_data.genVertexZ = genVertexPos.Z();
-    std::cout<<"-> "<<genVertexPos.X()<<" "<<genVertexPos.Y()<<" "<<genVertexPos.Z();
+   // std::cout<<"-> "<<genVertexPos.X()<<" "<<genVertexPos.Y()<<" "<<genVertexPos.Z();
 
 
     

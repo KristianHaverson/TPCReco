@@ -163,7 +163,7 @@ TVector3 EventSourceMC::createVertex() const{
   x = dis(gen1); 
   y = disGaus(gen2);
   z = disGaus(gen3);
-  std::cout<<"-> "<<x<<" "<<y<<" "<<z<<std::endl;
+  //std::cout<<"-> "<<x<<" "<<y<<" "<<z<<std::endl;
 
 
 
@@ -176,7 +176,7 @@ TVector3 EventSourceMC::createVertex() const{
 /////////////////////////////////////////////////////////
 
 //!------------------------------------------------------
-double EventSourceMC::Boost2Lab(double const length,TVector3 &tangent, pid_type ion_id)const{
+double EventSourceMC::Boost2Lab(double const gammaEnergy,double const length,TVector3 &tangent, pid_type ion_id)const{
   
   // ** KE ** //
   IonRangeCalculator myRangeCalculator(gas_mixture_type::CO2,250,293.15);
@@ -184,70 +184,117 @@ double EventSourceMC::Boost2Lab(double const length,TVector3 &tangent, pid_type 
   double carbonEnergyKe =myRangeCalculator.getIonEnergyMeV(pid_type::CARBON_12, length);
  
   // ** ION INFO ** //
-  const double AMU = 931.49410242; // MeV/c^2
-  const double alphaMass  =  4.00260325413  *AMU ;
-  const double oxygenMass = 15.99491461956*AMU; 
-  const double carbonMass = 12.000*AMU; 
+  const double AMU        = 931.49410242; // MeV/c^2
+  const double alphaMass  = 4.00260325413 * AMU ;
+  const double oxygenMass = 15.99491461956 * AMU; 
+  const double carbonMass = 12.000 * AMU; 
 
-  // ** BEAM INFO ** //
+  // ** BEAM/TARGE LAB ** //
   TVector3 beamDir_LAB(-1,0, 0); // unit vector
-  double beamEnergy = 13.1;
-  TLorentzVector p4_beam_CMS(beamDir_LAB.Unit()*beamEnergy, beamEnergy); // [MeV/c, MeV/c, MeV/c, MeV/c^2]
-  TLorentzVector p4_target_CMS(0, 0, 0, oxygenMass); // [MeV/c, MeV/c, MeV/c, MeV/c^2]
-  TLorentzVector p4_total_CMS =  p4_beam_CMS + p4_target_CMS;
+  double beamEnergy_LAB = gammaEnergy;
+  TLorentzVector p4_beam_LAB(beamDir_LAB.Unit()*beamEnergy_LAB, beamEnergy_LAB); // [MeV/c, MeV/c, MeV/c, MeV/c^2]
+  TLorentzVector p4_target_LAB(0, 0, 0, oxygenMass); // [MeV/c, MeV/c, MeV/c, MeV/c^2]
+  TLorentzVector p4_total_LAB =  p4_beam_LAB + p4_target_LAB;
 
-  // ** BEAM CHECK ** //
-  double totalEnergy_CMS=(p4_target_CMS+p4_beam_CMS).E();
-  double totalEnergy_CMS_check=sqrt( oxygenMass*(2*beamEnergy+oxygenMass) ); 
+  // ** DEFINE BOOSTS **//
+  TVector3 boost_CMS_to_LAB = p4_total_LAB.BoostVector(); 
+  TLorentzRotation rot_CMS_to_LAB(boost_CMS_to_LAB);
 
-  std::cout<<"Total Energy CMS: "<<KRED<<totalEnergy_CMS<<" <> "<<totalEnergy_CMS_check<<RST<<std::endl;
+  TVector3 boost_LAB_to_CMS = p4_total_LAB.BoostVector(); 
+  TLorentzRotation rot_LAB_to_CMS(-boost_LAB_to_CMS);
 
+  // ** BEAM/TARGET CMS ** //
+  TLorentzVector p4_beam_CMS   =  rot_LAB_to_CMS * p4_beam_LAB;
+  TLorentzVector p4_target_CMS =  rot_LAB_to_CMS * p4_target_LAB;
+  TLorentzVector p4_total_CMS  =  p4_beam_CMS + p4_target_CMS;
 
+  // **  CHECKS ** //
+  double beamEnergy_CMS  = p4_beam_CMS.E(); 
+  double totalEnergy_LAB  = p4_total_LAB.E();
+  double totalEnergy_CMS  = p4_total_CMS.E();
+  double targetEnergy_LAB = p4_target_LAB.E();
+  double targetEnergy_CMS = p4_target_CMS.E();
 
-  double p_alpha_CMS =  sqrt(alphaEnergyKe*(alphaEnergyKe+2*alphaMass));
-  double p_carbon_CMS = sqrt(carbonEnergyKe*(carbonEnergyKe+2*carbonMass));
-  double Etot_alpha_CMS  = alphaMass+alphaEnergyKe;
+  double p_alpha_CMS      = sqrt(alphaEnergyKe*(alphaEnergyKe+2*alphaMass));
+  double p_carbon_CMS     = sqrt(carbonEnergyKe*(carbonEnergyKe+2*carbonMass));
+  double Etot_alpha_CMS   = alphaMass+alphaEnergyKe;
   double Etot_carbon_CMS  = carbonMass+carbonEnergyKe;
 
-  //std::cout<<"Total Energy Alpha  CMS: "<<KRED<<Etot_alpha_CMS<<RST<<std::endl;
-  //std::cout<<"Total Energy Carbon CMS: "<<KRED<<Etot_carbon_CMS<<RST<<std::endl;
-  //std::cout<<"Total Energy CMS xcheck: "<<KRED<<Etot_carbon_CMS+Etot_alpha_CMS <<RST<<std::endl;
+  if(ion_id==pid_type::C_12 )std::cout<<KGRN<<"__CARBON__"<<RST<<std::endl;
+  if(ion_id==pid_type::ALPHA)std::cout<<KGRN<<"____ALPHA____"<<RST<<std::endl;
+  std::cout<<KRED<<"********************************"<<RST<<std::endl;
+  std::cout<<"Check that p4_total_LAB - > p4_total_CMS goes to zero under inverse boost"<<std::endl;  
+  p4_total_LAB.Print();
+  p4_total_CMS.Print();
+  std::cout<<KRED<<"********************************"<<RST<<std::endl;
+  std::cout<<"OXYGEN E in LAB: "<<targetEnergy_LAB<<std::endl;//<<" <> "<<beamEnergy_LAB_xcheck<<std::endl;
+  std::cout<<"OXYGEN P in LAB: "<<p4_target_LAB.P()<<std::endl;//" <> "<<totalEnergy_CMS_xcheck<<std::endl; // DEBUG
+  std::cout<<"OXYGEN E in CMS: "<<targetEnergy_CMS<<std::endl;//<<" <> "<<beamEnergy_CMS_xcheck<<std::endl;
+  std::cout<<"OXYGEN P in CMS: "<<p4_target_CMS.P()<<std::endl;//" <> "<<totalEnergy_CMS_xcheck<<std::endl; // DEBUG
+  std::cout<<KRED<<"********************************"<<RST<<std::endl;
+  std::cout<<"GAMMA  E in LAB: "<<beamEnergy_LAB<<std::endl;//<<" <> "<<beamEnergy_LAB_xcheck<<std::endl;
+  std::cout<<"GAMMA  P in LAB: "<<p4_beam_LAB.P()<<std::endl;//" <> "<<totalEnergy_CMS_xcheck<<std::endl; // DEBUG
+  std::cout<<"GAMMA  E in CMS: "<<beamEnergy_CMS<<std::endl;//<<" <> "<<beamEnergy_CMS_xcheck<<std::endl;
+  std::cout<<"GAMMA  P in CMS: "<<p4_beam_CMS.P()<<std::endl;//" <> "<<totalEnergy_CMS_xcheck<<std::endl; // DEBUG
+  std::cout<<KRED<<"********************************"<<RST<<std::endl;
+  std::cout<<"TOTAL  E in LAB: "<<totalEnergy_LAB<<std::endl;//" <> "<<totalEnergy_CMS_xcheck<<std::endl; // DEBUG
+  std::cout<<"TOTAL  P in LAB: "<<p4_total_LAB.P()<<std::endl;//" <> "<<totalEnergy_CMS_xcheck<<std::endl; // DEBUG
+  std::cout<<KRED<<"********************************"<<RST<<std::endl;
+  std::cout<<"TOTAL  E in CMS: "<<totalEnergy_CMS<<std::endl;
+  std::cout<<"TOTAL  P in CMS: "<<p4_total_CMS.P()<<std::endl;
+  std::cout<<KRED<<"********************************"<<RST<<std::endl;
+  std::cout<<"Alpha  KE in CMS: "<<alphaEnergyKe<<std::endl;
+  std::cout<<"Alpha  E in CMS: "<<Etot_alpha_CMS<<std::endl;
+  std::cout<<KRED<<"********************************"<<RST<<std::endl;
+  std::cout<<"CARBON KE in CMS: "<<carbonEnergyKe<<std::endl;
+  std::cout<<"CARBON E in CMS: "<<Etot_carbon_CMS<<std::endl;
+  std::cout<<KRED<<"********************************"<<RST<<std::endl;
+
 
 
   
-  TVector3 boost_CMS_to_LAB = p4_total_CMS.BoostVector(); 
-  TLorentzRotation rot_CMS_to_LAB(boost_CMS_to_LAB);
+  
   double energyPostBoost=0;
-
   if(ion_id==pid_type::ALPHA){
-    TLorentzVector alpha_CMS(tangent*p_alpha_CMS,Etot_alpha_CMS);
-    TLorentzVector alpha_LAB = rot_CMS_to_LAB*alpha_CMS;
+
+    // ** BOOST ** //
+    TLorentzVector alpha_CMS(tangent * p_alpha_CMS, Etot_alpha_CMS);
+    TLorentzVector alpha_LAB = rot_CMS_to_LAB * alpha_CMS;
+
+    // ** THINGS TO SAVE ** //
     tangent = alpha_LAB.Vect();
     energyPostBoost=alpha_LAB.E()-alpha_LAB.M();
-    std::cout<<"ALPHA E = "<<alpha_LAB.E()-alpha_LAB.M()<<std::endl;   
+
+
+    std::cout<<"ALPHA  KE in LAB: "<<alpha_LAB.E()-alpha_LAB.M()<<std::endl; 
+    std::cout<<"ALPHA  KE in CMS (xcheck): "<<KBLU<<alpha_CMS.E()-alpha_CMS.M()<<RST<<std::endl; 
+    std::cout<<"ALPHA  P in LAB: "<<alpha_LAB.P()<<std::endl;
+    std::cout<<"ALPHA  P in CMS: "<<alpha_CMS.P()<<std::endl;
+
   } else if(ion_id==pid_type::C_12 ){
-    TLorentzVector carbon_CMS(tangent*p_carbon_CMS,Etot_carbon_CMS);
+    
+    // ** BOOST ** //
+    TLorentzVector carbon_CMS(tangent * p_carbon_CMS, Etot_carbon_CMS);
     TLorentzVector carbon_LAB = rot_CMS_to_LAB*carbon_CMS;
+
+    // ** THINGS TO SAVE ** //
     tangent = carbon_LAB.Vect();
     energyPostBoost=carbon_LAB.E()-carbon_LAB.M();
-    std::cout<<"CARBON E = "<<carbon_LAB.E()-carbon_LAB.M()<<std::endl;   
 
+    std::cout<<"CARBON  KE in LAB : "<<carbon_LAB.E()-carbon_LAB.M()<<std::endl; 
+    std::cout<<"CARBON  KE in CMS (xcheck): "<<KBLU<<carbon_CMS.E()-carbon_CMS.M()<<RST<<std::endl; 
+    std::cout<<"CARBON  P in LAB: "<<carbon_LAB.P()<<std::endl;
+    std::cout<<"CARBON  P in CMS: "<<carbon_CMS.P()<<std::endl;
   }
   tangent.SetMag(1.0);
-  //////////
-  //TLorentzVector p4_beam = rot_CMS_to_LAB*p4_beam_CMS;
-  //TLorentzVector p4_target = rot_CMS_to_LAB*p4_target_CMS;
-  //TLorentzVector p4_total = p4_beam+p4_target;
-  //p4_total.Print();
- // std::cout<<"^^^^^^^^^^^^^^^^^"<<std::endl;
-  //////////
+
   double rangePostBoost=0;
 
-  if(ion_id==pid_type::ALPHA)rangePostBoost = myRangeCalculator.getIonRangeMM(pid_type::ALPHA,energyPostBoost);
-  if(ion_id==pid_type::C_12) rangePostBoost  = myRangeCalculator.getIonRangeMM(pid_type::CARBON_12, energyPostBoost);
+  if(ion_id==pid_type::ALPHA)rangePostBoost  = myRangeCalculator.getIonRangeMM(pid_type::ALPHA,energyPostBoost);
+  if(ion_id==pid_type::C_12 )rangePostBoost  = myRangeCalculator.getIonRangeMM(pid_type::CARBON_12, energyPostBoost);
   std::cout<<"----------------"<<std::endl;
-  std::cout<<"rangeB4Boost -> "<<length<<std::endl;
-  std::cout<<"rangePostBoost -> "<<rangePostBoost<<std::endl;
+  std::cout<<"range before Boost -> "<<length<<std::endl;
+  std::cout<<"range after Boost -> "<<rangePostBoost<<std::endl;
   std::cout<<"----------------"<<std::endl;
   
 
@@ -264,27 +311,30 @@ double EventSourceMC::Boost2Lab(double const length,TVector3 &tangent, pid_type 
 TrackSegment3D EventSourceMC::createLorentzSegment(const TVector3 vertexPos, pid_type ion_id,TVector3 &aTangentNonBoost) const{
   
   double length = 0.0;
-  double minLength = 0.0, maxLength = 0.0;
   double theta = 0.0, phi = 0.0;
   double minCosTheta = -1, maxCosTheta = 1;
   double minPhi = -TMath::Pi(), maxPhi = TMath::Pi();
+  double gammaEnergy = 13.1;
 
   
 
   if(ion_id==pid_type::ALPHA){
-    minLength = 20;
-    maxLength = 60;    
+    length= SRIMNormtrackLength(gammaEnergy,250,ion_id); 
+    
     theta = TMath::ACos(myRndm.Uniform(minCosTheta, maxCosTheta));
     phi = myRndm.Uniform(minPhi, maxPhi);
   } 
   else if(ion_id==pid_type::C_12 && myTracks3D.size()==1){
-    minLength = 10;
-    maxLength = 15;
+length =     SRIMNormtrackLength(gammaEnergy,250,ion_id);
+    
     theta = aTangentNonBoost.Theta();
     phi = aTangentNonBoost.Phi();
   }
   
-  length = myRndm.Uniform(minLength, maxLength);
+ // length = myRndm.Uniform(minLength, maxLength);
+
+
+
   std::cout<<"theta -> "<<theta<<std::endl;
   std::cout<<"phi -> "<<phi<<std::endl;
   std::cout<<"length -> "<<length<<std::endl;
@@ -292,12 +342,12 @@ TrackSegment3D EventSourceMC::createLorentzSegment(const TVector3 vertexPos, pid
   TVector3 tangent;
   tangent.SetMagThetaPhi(1.0, theta, phi);
   if(ion_id==pid_type::ALPHA){aTangentNonBoost=-tangent;}
-
+  TVector3 tangentCopy =tangent;
 
   std::cout<<"====================="<<std::endl;
+  double newLength =  Boost2Lab(gammaEnergy,length,tangent,ion_id);
   std::cout<<"Pre Boost -> ";
-  tangent.Print();
- double newLength =  Boost2Lab(length,tangent,ion_id);
+  tangentCopy.Print();
   std::cout<<"Post Boost -> ";
   tangent.Print();
   std::cout<<"====================="<<std::endl;
@@ -486,6 +536,7 @@ void EventSourceMC::generateThreeProng(){
 
   int nParts = 3;
   for(int iPart=0;iPart<nParts;++iPart){
+
     myTracks3D.push_back(createTrack(aVtx, ion_id));
     std::cout<<KBLU<<"Generated track number: "<<std::to_string(iPart)<<RST<<std::endl;
     std::cout<<myTracks3D.back()<<std::endl;
@@ -506,6 +557,7 @@ void EventSourceMC::generateEvent(){
   myTracks3D.clear();
   
   generateTwoProng();
+  //generateThreeProng();
   
   //double aRndm = myRndm.Uniform(0,1);
   //if(aRndm<0.33) generateSingleProng();
@@ -531,39 +583,98 @@ Track3D EventSourceMC::createTrack(const TVector3 & aVtx, pid_type ion_id) const
   return aTrack;
 }
 
-
-
-
-
-double EventSourceMC::SRIMtrackLength(const double gammaEnergy, const double pressure, pid_type ion_id)const{
+double EventSourceMC::SRIMNormtrackLength(const double gammaEnergy, const double pressure, pid_type ion_id)const{
   IonRangeCalculator myRangeCalculator(gas_mixture_type::CO2,pressure,293.15);
-  double energy=0; //calculate the energy given 
-  double range=myRangeCalculator.getIonRangeMM(ion_id, energy);
-  std::cout<<range<<std::endl;
-  /*
-  if(ion_id)std:cout<<pressure<<<std:endl;
+  const double AMU        = 931.49410242; // MeV/c^2
+  const double alphaMass  = 4.00260325413 * AMU ;
+  const double carbonMass = 12.000 * AMU; 
+  double ke = gammaEnergy - 7.162; // -Q
+  if(ion_id==pid_type::ALPHA){
+    ke = ke*(carbonMass/(alphaMass+carbonMass));
+
+  } else if(ion_id==pid_type::C_12){
+    ke = ke * (alphaMass/(alphaMass+carbonMass));
+
+  }
+
+
+
+  double length = myRangeCalculator.getIonRangeMM(ion_id, ke);  
+
+  return length;
+
+
+
+
+
+} 
+
+
+void EventSourceMC::SRIMtrackLength(const double gammaEnergy, const double pressure, pid_type ion_id, double &minLen ,double &maxLen)const{
   
-  const double AMU = 931.49410242; // MeV/c^2
-  const double alphaMass  =  4.00260325413  *AMU ;
-  const double oxygenMass = 15.99491461956*AMU; 
-  const double carbonMass = 12.000*AMU; 
+  IonRangeCalculator myRangeCalculator(gas_mixture_type::CO2,pressure,293.15);
+  
+  
+  
+  const double AMU        = 931.49410242; // MeV/c^2
+  const double alphaMass  = 4.00260325413 * AMU ;
+  const double oxygenMass = 15.99491461956 * AMU; 
+  const double carbonMass = 12.000 * AMU; 
 
-
-  // Pre split
+  // BOOST: CMS->LAB
   TVector3 beamDir_LAB(-1,0, 0); // unit vector
-  TLorentzVector p4_beam_CMS(beamDir_LAB.Unit()*gammaEnergy, gammaEnergy); // [MeV/c, MeV/c, MeV/c, MeV/c^2]
-  TLorentzVector p4_target_CMS(0, 0, 0, oxygenMass); // [MeV/c, MeV/c, MeV/c, MeV/c^2]
-  TLorentzVector p4_total_CMS =  p4_beam_CMS + p4_target_CMS;
+  TLorentzVector p4_beam_LAB(beamDir_LAB.Unit()*gammaEnergy, gammaEnergy); // [MeV/c, MeV/c, MeV/c, MeV/c^2]
+  TLorentzVector p4_target_LAB(0, 0, 0, oxygenMass); // [MeV/c, MeV/c, MeV/c, MeV/c^2]
+  TLorentzVector p4_total_LAB =  p4_target_LAB + p4_beam_LAB;
+  TVector3 boost_CMS_to_LAB = p4_total_LAB.BoostVector(); 
+  TLorentzRotation rot(-boost_CMS_to_LAB);
 
-  //T
-  Vector3 tangent_alphaMin;
-  tangent.SetMagThetaPhi(1.0, 180, 0);
-  //TODO
-  double totalEnergy_CMS=(p4_target_CMS+p4_beam_CMS).E();
-  double totalEnergy_CMS_check=sqrt( oxygenMass*(2*beamEnergy+oxygenMass) ); 
+
+  TVector3 tangent1; // max
+  tangent1.SetMagThetaPhi(1.0, 360, 0);
+ 
+  TVector3 tangent2; // min
+  tangent2.SetMagThetaPhi(1.0, 180, 0);
   
-  std::cout<<"totalE: "<<totalEnergy_CMS<<" <> "<<totalEnergy_CMS_check<<std::endl;
-  */
+  double p = 0;
+  double ke = gammaEnergy - 7.162;
+  double addMass=0;
+
+
+  if(ion_id==pid_type::ALPHA){
+    ke = ke*(carbonMass/(alphaMass+carbonMass));
+    p = sqrt(ke*(ke+2*alphaMass));
+     addMass= alphaMass;
+
+  } else if(ion_id==pid_type::C_12){
+    ke = ke * (alphaMass/(alphaMass+carbonMass));
+    p = sqrt(ke*(ke+2*carbonMass));
+     addMass= carbonMass;
+
+  }
+
+
+
+
+  TLorentzVector boost1(tangent1 * p, ke+addMass);
+  TLorentzVector boosted1 = rot * boost1;
   
-  return 0.;
+  
+  TLorentzVector boost2(tangent2 * p, ke+addMass);
+  TLorentzVector boosted2 = rot * boost2;
+
+
+  double maxE = boosted1.E()-boosted1.M();
+  double minE = boosted2.E()-boosted2.M();
+
+  
+  maxLen = myRangeCalculator.getIonRangeMM(ion_id, maxE);  
+  minLen = myRangeCalculator.getIonRangeMM(ion_id, minE);
+
+  
+
+
+  return;
+
+
 }

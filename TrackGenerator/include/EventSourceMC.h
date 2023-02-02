@@ -75,10 +75,11 @@ public:
   void generateEvent();
 
   
-  double Boost2Lab(double const length,TVector3 &tangent, pid_type ion_id)const;
+  double Boost2Lab(double const gammaEnergy,double const length,TVector3 &tangent, pid_type ion_id)const;
   double boostTheta(double thetaCM);
   double boostPhi(double phiCM);
-  double SRIMtrackLength(const double gammaEnergy, const double pressure, pid_type ion_id)const;
+  void SRIMtrackLength(const double gammaEnergy, const double pressure, pid_type ion_id, double &minLen, double &maxLen)const;
+  double SRIMNormtrackLength(const double gammaEnergy, const double pressure, pid_type ion_id)const;
 
 };
 #endif
