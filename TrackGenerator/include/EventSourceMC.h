@@ -45,8 +45,13 @@ public:
   unsigned long int numberOfEvents() const;
 
   void loadGeometry(const std::string & fileName);
+
+  TLorentzVector getMomentumVec()const {return myPvec;}
+
+
   
  private:
+  TLorentzVector myPvec;
 
   TGraph* braggGraph_alpha, *braggGraph_12C;
   double braggGraph_alpha_energy, braggGraph_12C_energy;
@@ -60,11 +65,11 @@ public:
   pid_type myGenEventType;
 
   TVector3 createVertex() const;
-  TrackSegment3D createLorentzSegment(const TVector3 vertexPos, pid_type ion_id,TVector3 &aTangentNonBoost) const;  
+  TrackSegment3D createLorentzSegment(const TVector3 vertexPos, pid_type ion_id,TVector3 &aTangentNonBoost, TLorentzVector &p4outPut) const;  
   TrackSegment3D createSegment(const TVector3 vertexPos, pid_type ion_id) const;  
   TH1F createChargeProfile(double ion_range, pid_type ion_id) const;  
   Track3D createTrack(const TVector3 & aVtx, pid_type ion_id) const;
-  Track3D createTrack(const TVector3 & aVtx, pid_type ion_id,TVector3 &aTangentNonBoost) const;
+  Track3D createTrack(const TVector3 & aVtx, pid_type ion_id,TVector3 &aTangentNonBoost, TLorentzVector &p4outPut) const;
 
   void generateSingleProng(pid_type ion_id=pid_type::ALPHA);
   void generateTwoProng();
@@ -75,7 +80,7 @@ public:
   void generateEvent();
 
   
-  double Boost2Lab(double const gammaEnergy,double const length,TVector3 &tangent, pid_type ion_id)const;
+  double Boost2Lab(double const gammaEnergy,double const length,TVector3 &tangent, pid_type ion_id, TLorentzVector &output)const;
   double boostTheta(double thetaCM);
   double boostPhi(double phiCM);
   void SRIMtrackLength(const double gammaEnergy, const double pressure, pid_type ion_id, double &minLen, double &maxLen)const;

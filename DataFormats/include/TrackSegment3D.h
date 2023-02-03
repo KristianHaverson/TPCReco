@@ -7,7 +7,8 @@
 
 #include "TVector3.h"
 #include "TH2D.h"
-
+#include "TLorentzVector.h"
+#include "TLorentzRotation.h"
 #include "Hit2D.h"
 #include "TrackSegment2D.h"
 #include "CommonDefinitions.h"
@@ -102,6 +103,25 @@ class TrackSegment3D{
   TVector3 getVertexPos()const {return myVertexPos;}
   void setVertexPos(const TVector3& newPos){myVertexPos = newPos;}
   
+    TVector3 getMomentumVec()const {        std::cout<<"HERE4"<<std::endl;
+    std::cout<<myPvec.X()<<std::endl;
+    std::cout<<myPvec.Y()<<std::endl;
+    std::cout<<myPvec.Z()<<std::endl; return myPvec;}
+
+  void setMomentumVec(const TLorentzVector& newPvec){
+    std::cout<<"HERE2"<<std::endl;
+    std::cout<<newPvec.X()<<std::endl;
+    std::cout<<newPvec.Y()<<std::endl;
+    std::cout<<newPvec.Z()<<std::endl;
+    myPvec.SetX(newPvec.X());
+    myPvec.SetY(newPvec.Y());
+    myPvec.SetZ(newPvec.Z());
+        std::cout<<"HERE3"<<std::endl;
+    std::cout<<myPvec.X()<<std::endl;
+    std::cout<<myPvec.Y()<<std::endl;
+    std::cout<<myPvec.Z()<<std::endl;}
+
+
   //!
 
 
@@ -130,6 +150,7 @@ class TrackSegment3D{
   std::vector<Hit2DCollection> myRecHits;
   std::vector<double> myProjectionsChi2;
   TVector3 myVertexPos;
+ // TVector3 myPvec;
 };
 
 std::ostream & operator << (std::ostream &out, const TrackSegment3D &aSegment);
