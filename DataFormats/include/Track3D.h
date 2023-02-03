@@ -7,7 +7,8 @@
 
 #include "TrackSegment3D.h"
 #include "CommonDefinitions.h"
-
+#include "TLorentzVector.h"
+#include "TLorentzRotation.h"
 class Track3D{
 
  public:
@@ -72,6 +73,8 @@ class Track3D{
   void splitSegment(unsigned int iSegment,  double lengthFraction);
 
   void update();
+
+
  
  private:
 
@@ -101,9 +104,16 @@ class Track3D{
   std::vector<double> nodeHitsChi2;
   std::vector<double> nodeAngleChi2;
 
+
+
   TrackSegment3DCollection mySegments;
   TH1F myChargeProfile;
   double hypothesisFitChi2{99};
+
+  
+
+
+
 };
 
 typedef std::vector<Track3D> Track3DCollection;

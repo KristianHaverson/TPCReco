@@ -145,7 +145,8 @@ typedef struct {Float_t eventId, frameId,
     chargeReco,
     cosThetaReco, phiReco,
     ///
-    genVertexX,genVertexY,genVertexZ;
+    genVertexX,genVertexY,genVertexZ,
+    genMomentumX,genMomentumY,genMomentumZ;
     } TrackData;
 /////////////////////////
 int makeTrackTree(const  std::string & geometryFileName, const  std::string & dataFileName) {
@@ -162,7 +163,8 @@ int makeTrackTree(const  std::string & geometryFileName, const  std::string & da
   leafNames += "eventId:frameId:";
   leafNames += "eventTypeGen:alphaRangeGen:alphaEnergyGen:chargeGen:cosThetaGen:phiGen:";  
   leafNames += "eventTypeReco:alphaRangeReco:alphaEnergyReco:chargeReco:cosThetaReco:phiReco:";
-  leafNames += "genVertexX:genVertexY:genVertexZ";
+  leafNames += "genVertexX:genVertexY:genVertexZ:";
+  leafNames += "genMomentumX:genMomentumY:genMomentumZ";
   tree->Branch("track",&track_data,leafNames.c_str());
 
   // ** GEOMETRY ** //
@@ -188,7 +190,7 @@ int makeTrackTree(const  std::string & geometryFileName, const  std::string & da
 
   // ** MAIN LOOP ** //
   unsigned int nEntries = myEventSource->numberOfEntries();
-  nEntries = 10000; //TEST
+  nEntries = 400; //TEST
 
   for(unsigned int iEntry=0;iEntry<nEntries;++iEntry){
 
@@ -231,7 +233,15 @@ int makeTrackTree(const  std::string & geometryFileName, const  std::string & da
     track_data.genVertexX = genVertexPos.X();
     track_data.genVertexY = genVertexPos.Y();
     track_data.genVertexZ = genVertexPos.Z();
-   // std::cout<<"-> "<<genVertexPos.X()<<" "<<genVertexPos.Y()<<" "<<genVertexPos.Z();
+
+
+
+    TLorentzVector  genMomentum4P = myEventSource->getMomentumVec();
+    track_data.genMomentumX = genMomentum4P.X();
+    track_data.genMomentumY = genMomentum4P.Y();
+    track_data.genMomentumZ = genMomentum4P.Z();
+    
+    //std::cout<<"-> "<<genMomentum4P.X()<<" "<<genMomentum4P.Y()<<" "<<genMomentum4P.Z();
 
 
     
