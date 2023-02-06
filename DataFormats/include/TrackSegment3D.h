@@ -102,7 +102,7 @@ class TrackSegment3D{
    //!
   TVector3 getVertexPos()const {return myVertexPos;}
   void setVertexPos(const TVector3& newPos){myVertexPos = newPos;}
-  
+  /*
     TVector3 getMomentumVec()const {        std::cout<<"HERE4"<<std::endl;
     std::cout<<myPvec.X()<<std::endl;
     std::cout<<myPvec.Y()<<std::endl;
@@ -120,7 +120,7 @@ class TrackSegment3D{
     std::cout<<myPvec.X()<<std::endl;
     std::cout<<myPvec.Y()<<std::endl;
     std::cout<<myPvec.Z()<<std::endl;}
-
+*/
 
   //!
 
