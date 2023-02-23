@@ -190,7 +190,7 @@ int makeTrackTree(const  std::string & geometryFileName, const  std::string & da
 
   // ** MAIN LOOP ** //
   unsigned int nEntries = myEventSource->numberOfEntries();
-  nEntries = 400; //TEST
+  nEntries =1000; //TEST
 
   for(unsigned int iEntry=0;iEntry<nEntries;++iEntry){
 
@@ -219,14 +219,14 @@ int makeTrackTree(const  std::string & geometryFileName, const  std::string & da
     track_data.cosThetaGen = -tangentGen.X();
     track_data.phiGen = atan2(-tangentGen.Z(), tangentGen.Y());
 
-
-
     track_data.eventTypeReco = aTrack3DReco.getSegments().front().getPID() + +aTrack3DReco.getSegments().back().getPID();    
     track_data.alphaRangeReco =  aTrack3DReco.getSegments().front().getLength();    
     track_data.alphaEnergyReco = track_data.alphaRangeReco>0 ? myRangeCalculator.getIonEnergyMeV(pid_type::ALPHA, track_data.alphaRangeReco):0.0;
     track_data.chargeReco = aTrack3DReco.getIntegratedCharge(track_data.alphaRangeReco);
     const TVector3 & tangentReco = aTrack3DReco.getSegments().front().getTangent();
-    track_data.cosThetaReco = -tangentReco.X();
+  
+    
+     track_data.cosThetaReco = -tangentReco.X();
     track_data.phiReco = atan2(-tangentReco.Z(), tangentReco.Y());
 
     TVector3  genVertexPos = aTrack3DGen.getSegments().front().getVertexPos();
@@ -236,10 +236,10 @@ int makeTrackTree(const  std::string & geometryFileName, const  std::string & da
 
 
 
-    TLorentzVector  genMomentum4P = myEventSource->getMomentumVec();
-    track_data.genMomentumX = genMomentum4P.X();
-    track_data.genMomentumY = genMomentum4P.Y();
-    track_data.genMomentumZ = genMomentum4P.Z();
+    //TLorentzVector  genMomentum4P = myEventSource->getMomentumVec();
+    //track_data.genMomentumX = genMomentum4P.X();
+    //track_data.genMomentumY = genMomentum4P.Y();
+    //track_data.genMomentumZ = genMomentum4P.Z();
     
     //std::cout<<"-> "<<genMomentum4P.X()<<" "<<genMomentum4P.Y()<<" "<<genMomentum4P.Z();
 

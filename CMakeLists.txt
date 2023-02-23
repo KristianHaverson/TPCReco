@@ -11,7 +11,7 @@ include(Tests)
 #ROOT 
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 list(APPEND CMAKE_MODULE_PATH $ENV{ROOTSYS}/etc/cmake)
-find_package(ROOT REQUIRED COMPONENTS Physics HistPainter)
+find_package(ROOT REQUIRED COMPONENTS Physics HistPainter Spectrum RooFit)
 include(${ROOT_USE_FILE})
 
 MESSAGE( STATUS "CMAKE_PREFIX_PATH:         " ${CMAKE_PREFIX_PATH} )
