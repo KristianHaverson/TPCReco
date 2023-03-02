@@ -171,9 +171,9 @@ TVector3 EventSourceMC::createVertex() const{
 
  // (-45.5864, 5.81417, -59.9457)
 
-  // x = -45.5864; 
-  // y = 5.81417;
-  // z = -59.9457;
+   x =  71.493;// -84.5238 ;// -74.2498;//-45.5864; 
+   y =  1.41906;// -5.55897 ;// -4.7524;// 5.81417;
+   z =  -59.8498;//  -62.5323;// -2.80696;// -59.9457;
   //std::cout<<"-> "<<x<<" "<<y<<" "<<z<<std::endl;
 
 
@@ -346,8 +346,8 @@ TrackSegment3D EventSourceMC::createLorentzSegment(const TVector3 vertexPos, pid
     phi = myRndm.Uniform(minPhi, maxPhi);
 
     //length = 79.9807;
-    //theta=0.761485;
-    //phi = 2.48371;
+    theta=0.648208;//  0.867542;// 2.72517;
+    phi = 2.07373;//  -2.19611;//-3.13123;
 
 
   } 
@@ -375,7 +375,7 @@ TrackSegment3D EventSourceMC::createLorentzSegment(const TVector3 vertexPos, pid
 
  
   //std::cout<<"====================="<<std::endl;
-  double newLength = length;//Boost2Lab(gammaEnergy,length,tangent,ion_id,p4outPut);
+  double newLength = Boost2Lab(gammaEnergy,length,tangent,ion_id,p4outPut);
   std::cout<<"Pre Boost -> ";
   tangentCopy.Print();
   std::cout<<"Post Boost -> ";
@@ -925,8 +925,8 @@ void EventSourceMC::fill3DChargeCloud(const Track3D & aTrack){
   TVector3 depositPosition, smearedPosition;
   TH1F hChargeProfile = aTrack.getChargeProfile();
   double lambda = 0.0, value = 0.0;
-  double sigma =0.9;
-  int nTries = 100;
+  double sigma = 0.56;//0.9;
+  int nTries = 200;
   
   for(int iBin=0;iBin<hChargeProfile.GetNbinsX();++iBin){
     value = hChargeProfile.GetBinContent(iBin);
@@ -955,8 +955,8 @@ void EventSourceMC::fillPEventTPC(const TH3D & h3DChargeCloud, const Track3D & a
   int iPolyBin = 0;
   double value = 0.0, totalCharge = 0.0;
   bool err_flag = false;  
-  double sigma = 0.9;
-  int nTries = 100;
+  double sigma = 0.56;//0.9;
+  int nTries = 200;
   
   double lambda = 0.0;
 
@@ -1037,7 +1037,7 @@ void EventSourceMC::generateThreeProng(){
 
   myGenEventType = pid_type::THREE_ALPHA;
   pid_type ion_id = pid_type::ALPHA;
-  const int groun_or_exc = 1; // [0 - ground , 1- excited]
+  const int groun_or_exc = 0; // [0 - ground , 1- excited]
 
   TVector3 aVtx = createVertex();
   AlphaData alphaData;
@@ -1091,8 +1091,8 @@ void EventSourceMC::generateEvent(){
 
   myTracks3D.clear();
   
-  //generateTwoProng();
-  generateThreeProng();
+  generateTwoProng();
+  //generateThreeProng();
   
   //double aRndm = myRndm.Uniform(0,1);
   //if(aRndm<0.33) generateSingleProng();
