@@ -53,6 +53,7 @@ TTree *get_tree(TFile *tree_file, TString key){
 
 void set_global_style(){
   gStyle->SetHistLineWidth(2);
+  gStyle->SetHistLineWidth(2);
   //  gStyle->SetOptStat("neuoi");
   gStyle->SetOptStat(0);
   gStyle->SetPalette(kRainBow);
