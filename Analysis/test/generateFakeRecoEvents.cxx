@@ -508,6 +508,8 @@ Track3D generateFakeAlphaCarbonGenericEvent(std::shared_ptr<GeometryTPC> aGeomet
     std::cout<<"Oxygen excited state mass (2 methods)= "<<oxygenMassExcited<<", "<<oxygenMassExcited_xcheck<<std::endl;
     std::cout<<"Alpha kin.energy in DET/LAB: "<<alphaP4_DET.E()-alphaP4_DET.M()<<std::endl;
     std::cout<<"Alpha mass in DET/LAB: "<<alphaP4_DET.M()<<std::endl;
+
+    
     std::cout<<"Carbon kin.energy in DET/LAB: "<<carbonP4_DET.E()-carbonP4_DET.M()<<std::endl;
     std::cout<<"Carbon mass in DET/LAB: "<<carbonP4_DET.M()<<std::endl;
   }
