@@ -92,8 +92,16 @@ private:
   double trackEnergy[2];
   TVector3 tangentI1;
   TVector3 tangentI2;
+
+
   
 public:
+
+  //TLorentzVector PRONG2_CARBON_LAB;
+  //TLorentzVector PRONG2_ALPHA_LAB;
+
+  //void set2pCarbon(TLorentzVector vec){ PRONG2_CARBON_LAB = vec; }
+  //void set2pAlpha(TLorentzVector& vec) { PRONG2_ALPHA_LAB = vec; }
   // Setters for length, angle, and energy of each alpha particle
 
   void setTangent(int index, TVector3 tangent) {
@@ -105,6 +113,7 @@ public:
   TVector3 getTangent(int index) {
     if(index==0)return tangentI1;
     if(index==1)return tangentI2;
+    return tangentI2;
   }
 
 
@@ -114,7 +123,7 @@ public:
   void setTheta(int index, double value) {
     trackTheta[index] = value;
   }
-  void setIonPhi(int index, double value) {
+  void setPhi(int index, double value) {
     trackPhi[index] = value;
   }
   void setEnergy(int index, double value) {
@@ -172,88 +181,84 @@ public:
 
   void setChamberPressure(double pressure){CHAMBER_PRESSURE=pressure;}
   double getChamberPressure(){return CHAMBER_PRESSURE;}
-  
+
+
+  // ------------------------------------------------- //
+  bool DEBUG = true;
+
   double GAMMA_ENERGY = 0.0;
   double CHAMBER_PRESSURE = 0.0;
-  bool DEBUG= true;
 
   const double CONV_Kev2MeV = 1./1000.;
 
   const double AMU        = 931.49410242;
+
   const double MASS_8Be   = AMU  * 8.00530510000; 
 	const double MASS_4He   = AMU  * 4.00260325413; 
   const double MASS_12C   = AMU  *12.00000000000; 
   const double MASS_16O = 15.99491461956 * AMU; 
 
 
+  const double Q_VALUE_16O  = - 7.162; 
   const double Q_VALUE_12C  = - 7367.0 * CONV_Kev2MeV; 
   const double Q_VALUE_8BE  =   92.0   * CONV_Kev2MeV; 
 
 
-
- private:
   
 
 
+  // ------------------------------------------------- //
 
 
-  // ** PROCESS ** //
+  private:
   void generateEvent();
   TVector3 createVertex() const;
 
- private:
-    void generateTwoProng();
-      void SRIMtrackLength( pid_type ion_id, double &minLen, double &maxLen)const;
+  private:
+  void generateTwoProng();
+    double SRIMNormtrackLength( pid_type ion_id)const;
+    Track3D createTrack(const TVector3 & aVtx, pid_type ion_id,TVector3 &aTangentNonBoost, TLorentzVector &p4outPut,Prong2_TrackInfo Prong2_TrackInfo ) const;
+
+    Track3D createTrack(const TVector3 & aVtx, pid_type ion_id, Prong2_TrackInfo &Prong2_TrackInfo, const int index ) const;
+    TrackSegment3D create2pSegment(const TVector3 vertexPos, pid_type ion_id,Prong2_TrackInfo &Prong2_TrackInfo, const int index) const;
+    double setInfoFromSRIM_2p( pid_type ion_id,Prong2_TrackInfo &Prong2_TrackInfo, const int index)const;
+
+    TrackSegment3D Prong2_createSegmentBoost(const TVector3 vertexPos, pid_type ion_id,TVector3 &aTangentNonBoost, TLorentzVector &p4outPut,Prong2_TrackInfo Prong2_TrackInfo) const;  
+    double Prong2_Boost2Lab(double const gammaEnergy,double const length,TVector3 &tangent, pid_type ion_id, TLorentzVector &output,Prong2_TrackInfo Prong2_TrackInfo)const;
 
   
   private:
-    void generateThreeProng(const int state);
+  void generateThreeProng(const int state);
     Track3D createTrack(const TVector3 & aVtx, pid_type ion_id,Prong3_TrackInfo &Prong3_TrackInfo, const int index , const int groun_or_exc) const;
     TrackSegment3D create3pSegment(const TVector3 vertexPos, pid_type ion_id,Prong3_TrackInfo &Prong3_TrackInfo, const int index, const int groun_or_exc ) const;
-    double setInfoFromSRIM_3p( const double pressure, pid_type ion_id,Prong3_TrackInfo &Prong3_TrackInfo, const int index)const;
+    double setInfoFromSRIM_3p( pid_type ion_id,Prong3_TrackInfo &Prong3_TrackInfo, const int index)const;
 
   
 
 
 
-  
+
   TLorentzVector myPvec;
-
   TGraph* braggGraph_alpha, *braggGraph_12C;
   double braggGraph_alpha_energy, braggGraph_12C_energy;
   double keVToChargeScale{1.0};
-
   mutable TRandom3 myRndm{0};
   std::shared_ptr<UVWprojector> myProjectorPtr;
   mutable IonRangeCalculator myRangeCalculator;
   TH3D my3DChargeCloud;
   std::vector<Track3D> myTracks3D;
   pid_type myGenEventType;
-
-  
-  TrackSegment3D Prong2_createSegmentBoost(const TVector3 vertexPos, pid_type ion_id,TVector3 &aTangentNonBoost, TLorentzVector &p4outPut) const;  
-  double Prong2_Boost2Lab(double const gammaEnergy,double const length,TVector3 &tangent, pid_type ion_id, TLorentzVector &output)const;
-
-  
+  void fill3DChargeCloud(const Track3D & aTrack);
+  void fillPEventTPC(const TH3D & h3DChargeCloud, const Track3D & aTrack);
+  void generateSingleProng(pid_type ion_id=pid_type::ALPHA);
   TrackSegment3D createSegment(const TVector3 vertexPos, pid_type ion_id) const;  
   TH1F createChargeProfile(double ion_range, pid_type ion_id) const;  
   Track3D createTrack(const TVector3 & aVtx, pid_type ion_id) const;
-  Track3D createTrack(const TVector3 & aVtx, pid_type ion_id,TVector3 &aTangentNonBoost, TLorentzVector &p4outPut) const;
   
-    void generateSingleProng(pid_type ion_id=pid_type::ALPHA);
 
 
-  void fill3DChargeCloud(const Track3D & aTrack);
-  void fillPEventTPC(const TH3D & h3DChargeCloud, const Track3D & aTrack);
 
   
-  double boostTheta(double thetaCM);
-  double boostPhi(double phiCM);
-  double SRIMNormtrackLength(const double gammaEnergy, const double pressure, pid_type ion_id)const;
- // double SRIMNormtrackLength(const double gammaEnergy, const double pressure, pid_type ion_id, const int index)const;
-double BoostbyVel(double const gammaEnergy,Prong3_TrackInfo &Prong3_TrackInfo,const int index,TVector3 &tangent)const;
-double Boost2Lab3p(double const gammaEnergy,Prong3_TrackInfo &Prong3_TrackInfo, int index)const;
-double BoostByVel3p(double const gammaEnergy,Prong3_TrackInfo &Prong3_TrackInfo, int index)const;
 };
 #endif
 

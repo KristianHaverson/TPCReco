@@ -82,6 +82,11 @@ return sum;
 /////////////////////////////////////
 int tpcDeco(const  std::string & geometryFileName,
 		  const  std::string & dataFileName);
+
+int reFit(const  std::string & geometryFileName,
+    const  std::string & dataFileName);
+
+
 /////////////////////////////////////
 /////////////////////////////////////
 boost::program_options::variables_map parseCmdLineArgs(int argc, char **argv){
@@ -134,7 +139,8 @@ int main(int argc, char **argv){
 
   int nEntriesProcessed = 0;
   if(dataFileName.size() && geometryFileName.size()){
-    nEntriesProcessed = tpcDeco(geometryFileName, dataFileName);
+   // nEntriesProcessed = tpcDeco(geometryFileName, dataFileName);
+    nEntriesProcessed = reFit(geometryFileName, dataFileName);
   }
   else{
     std::cout<<KRED<<"Configuration not complete: "<<RST
@@ -749,3 +755,79 @@ gSystem->ProcessEvents();
 }
 /////////////////////////////
 ////////////////////////////
+
+
+
+
+
+int reFit(const  std::string & geometryFileName, const  std::string & dataFileName) {
+
+  // ** EVENT SOURCE ** //
+
+
+
+  int ID[9]={ 301,923,961,1462,1462,1481,1495,2607,3200};
+
+  
+  std::shared_ptr<EventSourceMC> myEventSource = std::make_shared<EventSourceMC>(geometryFileName);
+  
+  // ** GEOMETRY ** //
+  int index = geometryFileName.find("mbar");
+  double pressure = stof(geometryFileName.substr(index-3, 3));
+  IonRangeCalculator myRangeCalculator(gas_mixture_type::CO2,pressure,293.15);
+
+  // ** MAIN LOOP ** //
+  unsigned int nEntries = myEventSource->numberOfEntries();
+  nEntries = 10; //TEST
+  std::cout<<"pressure -> "<<pressure<<std::endl;
+  std::cout<<"nEntries -> "<<nEntries<<std::endl;
+
+
+
+
+
+  TApplication application("",nullptr,nullptr);
+
+  for(unsigned int iEntry=0;iEntry<9;++iEntry){
+
+    myEventSource->loadFileEntry(ID[iEntry]);    
+    auto event = myEventSource->getCurrentEvent();
+
+    std::shared_ptr<TH2D> UHist2D = event->get2DProjection(projection_type::DIR_TIME_U, filter_type::none, scale_type::raw);
+    std::shared_ptr<TH2D> VHist2D = event->get2DProjection(projection_type::DIR_TIME_V, filter_type::none, scale_type::raw);
+    std::shared_ptr<TH2D> WHist2D = event->get2DProjection(projection_type::DIR_TIME_W, filter_type::none, scale_type::raw);
+  
+
+    TCanvas *canvas1 = new TCanvas("canvas1","canvas1",1000,600);
+    canvas1->Divide(3,1);
+
+    canvas1->cd(1);
+    UHist2D->Draw("colz 1");
+
+    canvas1->cd(2);
+    VHist2D->Draw("colz 1");
+
+    canvas1->cd(3);
+    WHist2D->Draw("colz 1");
+
+
+    canvas1->Modified();
+    canvas1->Update(); 
+    gSystem->ProcessEvents();
+
+
+    char step;
+		std::cout<<"Step forward? y/n"<<std::endl;
+		std::cin>>step;
+		if(step=='n')return 0 ;
+
+
+
+  
+  
+  
+  }
+
+
+  return 0;
+}
