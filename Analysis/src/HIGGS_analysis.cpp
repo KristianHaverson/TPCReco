@@ -1160,23 +1160,7 @@ bool HIGGS_analysis::eventFilter(Track3D *aTrack){
       }
     }
   }
-  /*
-  // cut #3a : XY plane : rectangular cut per track
-  if(result) {
-    for(auto &track: list) {
-      if( fabs(track.getEnd().X()) > 160.0   || // TODO - TO BE PARAMETERIZED !!!
-	  fabs(track.getEnd().Y()) > 80.0    || // TODO - TO BE PARAMETERIZED !!!
-	  fabs(track.getStart().X()) > 160.0 || // TODO - TO BE PARAMETERIZED !!!
-	  fabs(track.getStart().Y()) > 80.0 ) { // TODO - TO BE PARAMETERIZED !!!
-	result=false;
-	if(printRejected) {
-	  std::cout<<KRED<<__FUNCTION__<<": REJECTED (horizontal: track outside acceptance rectangle)"<<RST<<std::endl;
-	}
-	break;
-      }
-    }
-  }
-  */
+                                                                                                                                                   
 
   // cut #4 : global Z-span per event, verifies that:
   // - vertical projection length is below physical drift cage length
