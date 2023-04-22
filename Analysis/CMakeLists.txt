@@ -43,6 +43,8 @@ add_executable(recoEventsComparison  bin/recoEventsComparison.cpp)
 add_executable(recoEventsClean  bin/recoEventsClean.cpp)
 add_executable(recoEventsDiff bin/recoEventsDiff.cpp)
 add_executable(tpcDeco  bin/tpcDeco.cpp)
+add_executable(tpcRefit  bin/tpcRefit.cpp)
+
 # Compiler flags.
 #
 target_compile_options(${MODULE_NAME} PUBLIC ${CMAKE_ROOT_CFLAGS})
@@ -60,6 +62,8 @@ target_link_libraries(recoEventsComparison PUBLIC ${TPCRECO_LIBRARIES} ${Boost_L
 target_link_libraries(recoEventsClean PRIVATE ${TPCRECO_LIBRARIES}  Utilities Boost::program_options ${MODULE_NAME})
 target_link_libraries(recoEventsDiff PRIVATE ${TPCRECO_LIBRARIES}  Utilities Boost::program_options ${MODULE_NAME})
 target_link_libraries(tpcDeco PUBLIC ${TPCRECO_LIBRARIES} ${GRAW_TO_ROOT_LIBRARY} Utilities ${Boost_LIBRARIES} ${MODULE_NAME})
+target_link_libraries(tpcRefit PUBLIC ${TPCRECO_LIBRARIES} ${GRAW_TO_ROOT_LIBRARY} Utilities ${Boost_LIBRARIES} ${MODULE_NAME})
+
 
 # All install commands get the same destination. this allows us to use paths
 # relative to the executable.
@@ -70,6 +74,7 @@ install(TARGETS recoEventsAnalysis RUNTIME DESTINATION bin)
 install(TARGETS recoEventsComparison RUNTIME DESTINATION bin)
 install(TARGETS recoEventsClean recoEventsDiff RUNTIME DESTINATION bin)
 install(TARGETS tpcDeco RUNTIME DESTINATION bin)
+install(TARGETS tpcRefit RUNTIME DESTINATION bin)
 
 install(PROGRAMS $<1:${PROJECT_SOURCE_DIR}/${MODULE_NAME}/python/> DESTINATION python)
 install(FILES $<1:${PROJECT_SOURCE_DIR}/${MODULE_NAME}/test/> DESTINATION test)

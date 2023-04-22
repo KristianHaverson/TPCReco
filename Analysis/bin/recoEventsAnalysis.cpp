@@ -15,6 +15,7 @@
 #include "Track3D.h"
 #include "HIGGS_analysis.h"
 #include "HIGS_trees_analysis.h"
+#include "HIGS_trees_analysis_kris.h"
 
 #include "colorText.h"
 
@@ -163,7 +164,10 @@ int analyzeRecoEvents(const  std::string & geometryFileName,
   std::shared_ptr<HIGGS_analysis> myAnalysis(new HIGGS_analysis(aGeometry, beamEnergy, beamDir, pressure, temperature));
   std::shared_ptr<HIGS_trees_analysis> myTreesAnalysis(0);
   if(makeTreeFlag) myTreesAnalysis=std::make_shared<HIGS_trees_analysis>(aGeometry, beamEnergy, beamDir, pressure, temperature);
-
+  //!
+  //std::shared_ptr<HIGS_trees_analysis_kris> myTreesAnalysisK(0);
+  //if(makeTreeFlag) myTreesAnalysisK=std::make_shared<HIGS_trees_analysis_kris>(aGeometry, beamEnergy, beamDir, pressure, temperature);
+  //! 
   TTree *aTree = (TTree*)aFile->Get("TPCRecoData");
   if(!aTree) {
     std::cerr<<KRED<<"ERROR: Cannot find 'TPCRecoData' tree!"<<RST<<std::endl;
@@ -201,6 +205,7 @@ int analyzeRecoEvents(const  std::string & geometryFileName,
       for (auto & aSegment: aTrack->getSegments())  aSegment.setGeometry(aGeometry); // need TPC geometry for track projections
       myAnalysis->fillHistos(aTrack);
       if(makeTreeFlag) myTreesAnalysis->fillTrees(aTrack, aEventInfo);
+  //    if(makeTreeFlag) myTreesAnalysisK->fillTrees(aTrack, aEventInfo);
     }
     
   } else {
@@ -221,6 +226,7 @@ int analyzeRecoEvents(const  std::string & geometryFileName,
       for (auto & aSegment: aTrack->getSegments())  aSegment.setGeometry(aGeometry); // need TPC geometry for track projections
       myAnalysis->fillHistos(aTrack);
       if(makeTreeFlag) myTreesAnalysis->fillTrees(aTrack, aEventInfo);
+    //  if(makeTreeFlag) myTreesAnalysisK->fillTrees(aTrack, aEventInfo);
     }
     
   }

@@ -104,6 +104,14 @@ void HIGGS_analysis::bookHistos(){
   float xmin, xmax, ymin, ymax, zmin, zmax; // [mm]
   std::tie(xmin, xmax, ymin, ymax) = myGeometryPtr->rangeXY();
   std::tie(zmin, zmax) = myGeometryPtr->rangeZ();
+
+  //std::cout<<xmin<<std::endl;
+  //std::cout<<xmax<<std::endl;
+  //std::cout<<ymin<<std::endl;
+  //std::cout<<ymax<<std::endl;
+  //std::cout<<zmin<<std::endl;
+  //std::cout<<zmax<<std::endl;
+
   //  zmin = myGeometryPtr->GetDriftCageZmin();
   //  zmax = myGeometryPtr->GetDriftCageZmax();
 
@@ -115,7 +123,9 @@ void HIGGS_analysis::bookHistos(){
   //
   //  // plot active volume's faces
   //  TGraph gr=myGeometryPtr->GetActiveAreaConvexHull();
+
   //  auto l=new TPolyLine3D(5*(gr.GetN()-1));
+
   //  for(auto iedge=0; iedge<gr.GetN()-1; iedge++) {
   //    l->SetPoint(iedge*5+0,
   //		gr.GetX()[iedge],
@@ -175,7 +185,8 @@ void HIGGS_analysis::bookHistos(){
     histos2D[(prefix+"_vertexXY").c_str()]=
       new TH2F((prefix+"_vertexXY").c_str(),
 	       Form("%s;Vertex position X_{DET} [mm];Vertex position Y_{DET} [mm];%s", info, perEventTitle),
-	       (xmax-xmin)/binSizeMM_2dXY, xmin, xmax, (ymax-ymin)/binSizeMM_2dXY, ymin, ymax);
+	       (xmax-xmin)/binSizeMM_2dXY, xmin-15, xmax+15, (ymax-ymin)/binSizeMM_2dXY, ymin-8, ymax+8);
+         
     histos2D[(prefix+"_vertexYZ").c_str()]=
       new TH2F((prefix+"_vertexYZ").c_str(),
 	       Form("%s;Vertex position Y_{DET} [mm];Vertex position Z_{DET} [mm];%s", info, perEventTitle),
@@ -190,20 +201,69 @@ void HIGGS_analysis::bookHistos(){
     case 3: // DALITZ PLOTS FOR 3-BODY DECAY OF CARBON IN CMS FRAME : symmetrized track pairs, 3-prong only
       histos2D[(prefix+"_Dalitz1_CMS").c_str()]=
 	new TH2F((prefix+"_Dalitz1_CMS").c_str(),
-		 Form("%s - Dalitz plot;#it{m_{i,j}} [MeV/c^{2}];#it{m_{i,k}} [MeV/c^{2}];Probability [arb.u.]", info),
-		 100, 2*myRangeCalculator.getIonMassMeV(ALPHA),
-		 myRangeCalculator.getIonMassMeV(CARBON_12)-myRangeCalculator.getIonMassMeV(ALPHA),
-		 100, 2*myRangeCalculator.getIonMassMeV(ALPHA),
-		 myRangeCalculator.getIonMassMeV(CARBON_12)-myRangeCalculator.getIonMassMeV(ALPHA) );
+		 Form("%s - Dalitz plot;#it{m^{2}_{i,j}} [MeV/c^{2}];#it{m^{2}_{i,k}} [MeV/c^{2}];Probability [arb.u.]", info),
+		 300, 55.6*pow(10,6),
+		 55.7*pow(10,6),
+		 300, 55.6*pow(10,6),
+		  55.7*pow(10,6));
+
+     //!
+
+       histos2D[(prefix+"_Dalitz1_ground_CMS").c_str()]=
+	new TH2F((prefix+"_Dalitz1_ground_CMS").c_str(),
+		 Form("%s - Dalitz plot;#it{m^{2}_{i,j}} [MeV/c^{2}];#it{m^{2}_{i,k}} [MeV/c^{2}];Probability [arb.u.]", info),
+		 300, 55.6*pow(10,6),
+		 55.7*pow(10,6),
+		 300, 55.6*pow(10,6),
+		  55.7*pow(10,6));
+
+
+
+       histos2D[(prefix+"_Dalitz1_ext_CMS").c_str()]=
+	new TH2F((prefix+"_Dalitz1_ext_CMS").c_str(),
+		 Form("%s - Dalitz plot;#it{m^{2}_{i,j}} [MeV/c^{2}];#it{m^{2}_{i,k}} [MeV/c^{2}];Probability [arb.u.]", info),
+		 300, 55.6*pow(10,6),
+		 55.7*pow(10,6),
+		 300, 55.6*pow(10,6),
+		  55.7*pow(10,6));
+     //!!!!!!!!
+
       // Special version of Dalitz plot for identical masses, centered at (chi=0, psi=0):
       // abscissa : chi = (eps1+2*eps2-1)/sqrt(3) = (T2-T3)/sqrt(3)/Q
       // ordinate : psi = eps1-1/3 = (2*T1-T2-T3)/3/Q
       // where: eps_i=T_i/Q, Q=T1+T2+T3
       // Reference: K.L.Laursen et al., Eur. Phys. J. A 62 (2016) 271.
+   //   double bb = (0.8 - -0.8) / 100.;
+
+    histos2D[(prefix+"_Dalitz2_ground_CMS").c_str()]=
+      new TH2F((prefix+"_Dalitz2_ground_CMS").c_str(),
+		  Form("%s - Dalitz plot;#chi;#psi;Probability [arb.u.]", info),
+		   (0.8 +0.8) / 0.001 , -0.8, 0.8,  (0.8 +0.8) /0.001, -0.8, 0.8);
+
+
+    histos2D[(prefix+"_Dalitz2_excited_CMS").c_str()]=
+      new TH2F((prefix+"_Dalitz2_excited_CMS").c_str(),
+		  Form("%s - Dalitz plot;#chi;#psi;Probability [arb.u.]", info),
+		   (0.8 +0.8) / 0.001 , -0.8, 0.8,  (0.8 +0.8) /0.001, -0.8, 0.8);
+
+
+
+
+   histos2D[(prefix+"_Dalitz_CMS______kris").c_str()]=
+      new TH2F((prefix+"_Dalitz_CMS______kris").c_str(),
+		  Form("%s - Dalitz plot;X;Y;", info),
+		   (0.8 +0.8) / 0.001 , -0.8, 0.8,  (0.8 +0.8) /0.001, -0.8, 0.8);
+
+
+
+
+
+
       histos2D[(prefix+"_Dalitz2_CMS").c_str()]=
 	new TH2F((prefix+"_Dalitz2_CMS").c_str(),
 		 Form("%s - Dalitz plot;#chi;#psi;Probability [arb.u.]", info),
-		 200, -0.50, 0.50, 200, -0.50, 0.50);
+		   (0.8 +0.8) / 0.01 , -0.8, 0.8,  (0.8 +0.8) /0.01, -0.8, 0.8);
+
       // PLOTS FOR TRIPLE-ALPHA BREAKUP OF CARBON IN CMS FRAME : three entries per horizontal line
       // Reference: C.Au.Diget at al., Phys. Rev. C 80 (2009) 034316.
       histos2D[(prefix+"_Dalitz3_CMS").c_str()]=
@@ -316,6 +376,36 @@ void HIGGS_analysis::bookHistos(){
     for(auto t=0U; t<categoryPIDhname[c].size(); ++t) {
       auto pid=categoryPIDhname[c].at(t);
       auto pidLatex=categoryPIDlatex[c].at(t).c_str();
+
+
+
+
+            histos2D[(prefix+pid+"_len_lenSum").c_str()]=
+	new TH2F((prefix+pid+"_len_v_lenSum").c_str(),
+  		Form("%s; %s track length [mm];Sum of track lengths [mm] %s", info, pidLatex, perTrackTitle),
+		 maxLengthMM/binSizeMM, 0, maxLengthMM,
+		 maxLengthMM/binSizeMM, 0, maxLengthMM);
+/**/
+histos2D[(prefix+pid+"_ThetaBEAM_len_LAB_cutOnalpha0len_up").c_str()]=
+	new TH2F((prefix+pid+"_ThetaBEAM_len_LAB_cutOnalpha0len_up").c_str(),
+		 Form("%s;%s track #theta_{BEAM} in LAB;%s track length [mm];%s", info, pidLatex,  pidLatex, perTrackTitle),
+		 100, 0, TMath::Pi(),
+		 maxLengthMM/binSizeMM, 0, maxLengthMM);
+
+histos2D[(prefix+pid+"_ThetaBEAM_len_LAB_cutOnalpha0len_down").c_str()]=
+	new TH2F((prefix+pid+"_ThetaBEAM_len_LAB_cutOnalpha0len_down").c_str(),
+		 Form("%s;%s track #theta_{BEAM} in LAB;%s track length [mm];%s", info, pidLatex,  pidLatex, perTrackTitle),
+		 100, 0, TMath::Pi(),
+		 maxLengthMM/binSizeMM, 0, maxLengthMM);
+
+
+
+
+
+
+
+
+
 
       // TRACK LENGTH : per category / per track
       histos1D[(prefix+pid+"_len").c_str()]=
@@ -945,11 +1035,24 @@ void HIGGS_analysis::fillHistos(Track3D *aTrack){
     //    const TVector3 beta_DET_LAB=getBetaVectorOfCMS(carbonMassGroundState).Unit()*(photon_E_LAB/(photon_E_LAB+carbonMassGroundState));
     // DEBUG
 
+
+
+
+    ///! inverse boost toframe of reference of decaying c12
+    // !e con res to tri
+    // !p con restric to crile
+    // !be 8 ground state dont lie in cirlce?
+
+
     // calculate array of track properties and total sums in CMS
     for(auto i=0;i<3;i++) {
       auto track=list.at(i);
 
       // boost P4 from DET/LAB frame to CMS frame (see TLorentzVector::Boost() convention!)
+
+      //! inverse boost
+      //! (1) plot dalitz from 3 alpha E;s in LAB
+      //! (2) inverse boost by gamma momentum
       alphaP4_DET_CMS[i]=TLorentzVector(alphaP4_DET_LAB[i]);
       alphaP4_DET_CMS[i].Boost(-1.0*beta_DET_LAB);
       // TODO
@@ -970,8 +1073,22 @@ void HIGGS_analysis::fillHistos(Track3D *aTrack){
     }
 
     // fill properties per track
-    for(auto i=0;i<3;i++) {
+    for(auto i=0;i<3;i++) { 
       auto track=list.at(i);
+       histos2D[Form("h_3prong_alpha%d_len_lenSum",i+1)]->Fill(alpha_len[i],lengthSUM);
+
+
+    // // if(i==1){
+    if(alpha_len[0]>62.0){
+    histos2D[Form("h_3prong_alpha%d_ThetaBEAM_len_LAB_cutOnalpha0len_up",i+1)]->Fill(acos(alpha_cosTheta_BEAM_LAB[i]), alpha_len[i]);
+    }
+
+    if(alpha_len[0]<=62.0){
+    histos2D[Form("h_3prong_alpha%d_ThetaBEAM_len_LAB_cutOnalpha0len_down",i+1)]->Fill(acos(alpha_cosTheta_BEAM_LAB[i]), alpha_len[i]);
+    }
+
+
+
       histos1D[Form("h_3prong_alpha%d_len",i+1)]->Fill(alpha_len[i]);
       histos1D[Form("h_3prong_alpha%d_deltaX",i+1)]->Fill(alpha_len[i]*track.getTangent().X());
       histos1D[Form("h_3prong_alpha%d_deltaY",i+1)]->Fill(alpha_len[i]*track.getTangent().Y());
@@ -1066,8 +1183,15 @@ void HIGGS_analysis::fillHistos(Track3D *aTrack){
     profiles1D["h_3prong_vertexY_gamma_E_LAB_prof"]->Fill(vertexPos.Y(), photon_E_LAB);
     profiles1D["h_3prong_vertexY_Qvalue_CMS_prof"]->Fill(vertexPos.Y(), Qvalue_CMS);
 
+    std::cout<<"M1    -> "<<alphaP4_BEAM_CMS[0].M() <<std::endl;
+    std::cout<<"M2    -> "<<alphaP4_BEAM_CMS[1].M() <<std::endl;
+    std::cout<<"M3    -> "<<alphaP4_BEAM_CMS[2].M() <<std::endl;
+    std::cout<<"E cms -> "<<totalEnergy_CMS<<std::endl;
     // fill symmetrized Dalitz plots
     for(auto i1=0; i1<3; i1++) {
+
+     // double sumEn = alpha_T_CMS[0] +alpha_T_CMS[1]+alpha_T_CMS[2];
+
 
       // triple-alpha coincidence plots => 3 entries per event
       histos2D["h_3prong_Dalitz3_CMS"]->Fill(alpha_T_CMS[i1], carbonExcitationEnergy);
@@ -1077,10 +1201,23 @@ void HIGGS_analysis::fillHistos(Track3D *aTrack){
       auto i3=(i1+2)%3;
 
       // consider even and odd permutations of {0,1,2} set => 6 entries per event
-      auto mass1=(alphaP4_BEAM_CMS[i1]+alphaP4_BEAM_CMS[i2]).M(); // [MeV/c^2]
-      auto mass2=(alphaP4_BEAM_CMS[i1]+alphaP4_BEAM_CMS[i3]).M(); // [MeV/c^2]
+      auto mass1=(alphaP4_BEAM_CMS[i1]+alphaP4_BEAM_CMS[i2]).M2(); // [MeV/c^2] 
+      auto mass2=(alphaP4_BEAM_CMS[i1]+alphaP4_BEAM_CMS[i3]).M2(); // [MeV/c^2]
       histos2D["h_3prong_Dalitz1_CMS"]->Fill(mass1, mass2);
       histos2D["h_3prong_Dalitz1_CMS"]->Fill(mass2, mass1);
+
+   if(alpha_len[0]>62.){
+
+      histos2D["h_3prong_Dalitz1_ground_CMS"]->Fill(mass1, mass2); // mass squared
+      histos2D["h_3prong_Dalitz1_ground_CMS"]->Fill(mass2, mass1);
+   }
+
+   if(alpha_len[0]<=62.0){
+      histos2D["h_3prong_Dalitz1_ext_CMS"]->Fill(mass1, mass2);
+      histos2D["h_3prong_Dalitz1_ext_CMS"]->Fill(mass2, mass1);
+
+   }
+
 
       // consider even and odd permutations of {0,1,2} set => 6 entries per event
       auto eps1=alpha_T_CMS[i1]/Qvalue_CMS;
@@ -1091,6 +1228,35 @@ void HIGGS_analysis::fillHistos(Track3D *aTrack){
       histos2D["h_3prong_Dalitz2_CMS"]->Fill( (eps1+2*eps3-1)/sqrt(3.), // chi
 					      eps1-1/3. ); // psi
       
+
+ 
+      histos2D["h_3prong_Dalitz_CMS______kris"]->Fill( (eps3+2*eps1-1)/sqrt(3.), // chi
+					      eps3-1/3. );
+      histos2D["h_3prong_Dalitz_CMS______kris"]->Fill( (eps3+2*eps2-1)/sqrt(3.), // chi
+					      eps3-1/3. ); 
+
+
+   if(alpha_len[0]>62.){
+   // if((alpha_len[0] +alpha_len[1] +alpha_len[2] ) >-0.6* (alpha_len[0]  )+123){
+     
+      histos2D["h_3prong_Dalitz2_ground_CMS"]->Fill( (eps1+2*eps2-1)/sqrt(3.), // chi
+					      eps1-1/3. ); // psi
+      histos2D["h_3prong_Dalitz2_ground_CMS"]->Fill( (eps1+2*eps3-1)/sqrt(3.), // chi
+					      eps1-1/3. ); // psi
+      }
+    
+   // if((alpha_len[0] +alpha_len[1] +alpha_len[2] ) <-0.6* (alpha_len[0]  )+123){
+
+   if(alpha_len[0]<=62.0){
+    histos2D["h_3prong_Dalitz2_excited_CMS"]->Fill( (eps1+2*eps2-1)/sqrt(3.), // chi
+					      eps1-1/3. ); // psi
+    histos2D["h_3prong_Dalitz2_excited_CMS"]->Fill( (eps1+2*eps3-1)/sqrt(3.), // chi
+					      eps1-1/3. ); // psi
+    }
+
+
+
+
     }
   }
   //////// DEBUG
@@ -1111,7 +1277,7 @@ bool HIGGS_analysis::eventFilter(Track3D *aTrack){
   //  return true;
 
   // NOTE: for manual reconstruction disable dE/dx fit quality checks (cut #6)
-  bool checkFitQualityOf2prongs=false; // TODO - TO BE PARAMETERIZED !!!
+  //bool checkFitQualityOf2prongs=false; // TODO - TO BE PARAMETERIZED !!!
 
   // print statistics on demand
   const auto printAccepted=false; // TODO - TO BE PARAMETERIZED !!!
@@ -1135,18 +1301,9 @@ bool HIGGS_analysis::eventFilter(Track3D *aTrack){
 	      return a.getLength() > b.getLength();
 	    });
 
-  // cut #2 : XY plane : vertex position per event, corrected for beam tilt
-  if(result) {
-    vertexPos = list.front().getStart();
-    if( fabs( vertexPos.Y() - (beam_offset+beam_slope*vertexPos.X()) ) > 0.5*beam_diameter ) {
-      result=false;
-      if(printRejected) {
-	std::cout<<KRED<<__FUNCTION__<<": REJECTED (horizontal: vertex too far from beam axis)"<<RST<<std::endl;
-      }
-    }
-  }
+
   
-  // cut #3 : XY plane : minimal distance to the border of UVW active area
+  // cut #2 : XY plane : minimal distance to the border of UVW active area
   // - less strict than simple XY rectangular cut, allows to gain some statistics
   if(result) {
     for(auto &track: list) {
@@ -1160,7 +1317,23 @@ bool HIGGS_analysis::eventFilter(Track3D *aTrack){
       }
     }
   }
-                                                                                                                                                   
+
+
+/*
+    // cut #3 : XY plane : vertex position per event, corrected for beam tilt
+  if(result) {
+    vertexPos = list.front().getStart();
+    if( fabs( vertexPos.Y() - (beam_offset+beam_slope*vertexPos.X()) ) > 0.5*beam_diameter ) {
+      result=false;
+      if(printRejected) {
+	std::cout<<KRED<<__FUNCTION__<<": REJECTED (horizontal: vertex too far from beam axis)"<<RST<<std::endl;
+      }
+    }
+  }*/
+
+
+
+                                                                                                                                                 
 
   // cut #4 : global Z-span per event, verifies that:
   // - vertical projection length is below physical drift cage length
@@ -1210,7 +1383,8 @@ bool HIGGS_analysis::eventFilter(Track3D *aTrack){
   // reconstruction and to fake data generated by toy MC. If we are going to use results
   // from automatic reconstruction for demonstration of cross section measurement then those
   // cuts must be taken into account as well while correcting the rates!
-  if(result && checkFitQualityOf2prongs && list.size()==2) {
+ 
+ /* if(result && checkFitQualityOf2prongs && list.size()==2) {
     auto length = aTrack->getLength();
     auto charge = aTrack->getIntegratedCharge(length);
     auto chi2 = aTrack->getChi2();
@@ -1232,7 +1406,7 @@ bool HIGGS_analysis::eventFilter(Track3D *aTrack){
 		   <<std::endl;
       }
     }
-  }
+  }*/
 
   if(printAccepted && result) {
     std::cout<<KGRN<<__FUNCTION__<<": ACCEPTED"<<RST<<std::endl;
@@ -1294,8 +1468,8 @@ void HIGGS_analysis::setBeamProperties(float beamEnergyInMeV, // nominal gamma b
   photonEnergyInMeV_LAB = fabs(beamEnergyInMeV);
   photonUnitVec_DET_LAB = beamDir.Unit();
   beam_slope=tan(3.0e-3); // [rad], measured slope: Y_DET(X_DET)=offset+slope*X_DET
-  beam_offset=-1.3; // [mm], measured offset: Y_DET of beam axis at X_DET=0
-  beam_diameter=12.0; // [mm] // TODO - TO BE PARAMETERIZED !!!
+  beam_offset=-0.73; // [mm], measured offset: Y_DET of beam axis at X_DET=0
+  beam_diameter=11.8; // [mm] // TODO - TO BE PARAMETERIZED !!!
 }
 ///////////////////////////////
 ///////////////////////////////
