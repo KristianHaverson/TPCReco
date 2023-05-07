@@ -65,7 +65,7 @@ void HIGGS_analysis::bookHistos(){
   categoryPID[3].push_back("alpha2"); // 3-prong 2nd alpha
   categoryPID[3].push_back("alpha3"); // 3-prong 3rd alpha
 
-  // PID for creating unique histogram names
+  // PID for creating zque histogram names
   std::vector<std::string> categoryPIDhname[4];; 
   categoryPIDhname[0].push_back(""); // any track
   categoryPIDhname[1].push_back("_alpha"); // 1-prong alpha
@@ -508,10 +508,23 @@ histos2D[(prefix+pid+"_ThetaBEAM_len_LAB_cutOnalpha0len_down").c_str()]=
 	  new TH1F((prefix+pid+"_phiBEAM_CMS").c_str(),
 		   Form("%s;%s track #phi_{BEAM} in CMS [rad];%s", info, pidLatex, perTrackTitle),
 		   100, -TMath::Pi(), TMath::Pi());
-	histos1D[(prefix+pid+"_thetaBEAM_CMS").c_str()]=
+	
+  histos1D[(prefix+pid+"_thetaBEAM_CMS").c_str()]=
 	  new TH1F((prefix+pid+"_thetaBEAM_CMS").c_str(),
 		   Form("%s;%s track #theta_{BEAM} in CMS [rad];%s", info, pidLatex, perTrackTitle),
 		   100, 0, TMath::Pi());
+  histos1D[(prefix+pid+"_thetaBEAM_CMS_up").c_str()]=
+	  new TH1F((prefix+pid+"_thetaBEAM_CMS_up").c_str(),
+		   Form("%s;%s track #theta_{BEAM} in CMS [rad];%s", info, pidLatex, perTrackTitle),
+		   100, 0, TMath::Pi());
+  histos1D[(prefix+pid+"_thetaBEAM_CMS_down").c_str()]=
+	  new TH1F((prefix+pid+"_thetaBEAM_CMS_down").c_str(),
+		   Form("%s;%s track #theta_{BEAM} in CMS [rad];%s", info, pidLatex, perTrackTitle),
+		   100, 0, TMath::Pi());
+
+
+
+
 	histos1D[(prefix+pid+"_cosThetaBEAM_CMS").c_str()]=
 	  new TH1F((prefix+pid+"_cosThetaBEAM_CMS").c_str(),
 		   Form("%s;%s track cos(#theta_{BEAM}) in CMS;%s", info, pidLatex, perTrackTitle),
@@ -1003,7 +1016,10 @@ void HIGGS_analysis::fillHistos(Track3D *aTrack){
     for(auto i=0;i<3;i++) {
       auto track=list.at(i);
       alpha_len[i] = track.getLength();
-
+      
+      if(i==0){ alpha_len[i]=alpha_len[i]-5.9;}
+      if(i==1){ alpha_len[i]=alpha_len[i]+8.2;}
+      if(i==2){ alpha_len[i]=alpha_len[i]+8.2;}
       // calculate angles in LAB reference frame in BEAM coordinate system
       // TODO
       // TODO switch to DET->BEAM dedicated converter class!!!
@@ -1076,15 +1092,19 @@ void HIGGS_analysis::fillHistos(Track3D *aTrack){
     for(auto i=0;i<3;i++) { 
       auto track=list.at(i);
        histos2D[Form("h_3prong_alpha%d_len_lenSum",i+1)]->Fill(alpha_len[i],lengthSUM);
-
+      
 
     // // if(i==1){
-    if(alpha_len[0]>62.0){
+    if(alpha_len[0]>55.0){
     histos2D[Form("h_3prong_alpha%d_ThetaBEAM_len_LAB_cutOnalpha0len_up",i+1)]->Fill(acos(alpha_cosTheta_BEAM_LAB[i]), alpha_len[i]);
+      histos1D[Form("h_3prong_alpha%d_thetaBEAM_CMS_up",i+1)]->Fill(acos(alpha_cosTheta_BEAM_CMS[i]));
+
     }
 
-    if(alpha_len[0]<=62.0){
+    if(alpha_len[0]<=55.0){
     histos2D[Form("h_3prong_alpha%d_ThetaBEAM_len_LAB_cutOnalpha0len_down",i+1)]->Fill(acos(alpha_cosTheta_BEAM_LAB[i]), alpha_len[i]);
+      histos1D[Form("h_3prong_alpha%d_thetaBEAM_CMS_down",i+1)]->Fill(acos(alpha_cosTheta_BEAM_CMS[i]));
+
     }
 
 
@@ -1116,7 +1136,9 @@ void HIGGS_analysis::fillHistos(Track3D *aTrack){
 
       // properties in CMS reference frame in BEAM coordinate system
       histos1D[Form("h_3prong_alpha%d_phiBEAM_CMS",i+1)]->Fill(alpha_phi_BEAM_CMS[i]);
+     
       histos1D[Form("h_3prong_alpha%d_thetaBEAM_CMS",i+1)]->Fill(acos(alpha_cosTheta_BEAM_CMS[i]));
+     
       histos1D[Form("h_3prong_alpha%d_cosThetaBEAM_CMS",i+1)]->Fill(alpha_cosTheta_BEAM_CMS[i]);
       histos2D[Form("h_3prong_alpha%d_cosThetaBEAM_E_CMS",i+1)]->Fill(alpha_cosTheta_BEAM_CMS[i], alpha_T_CMS[i]);
       profiles1D[Form("h_3prong_alpha%d_cosThetaBEAM_E_CMS_prof",i+1)]->Fill(alpha_cosTheta_BEAM_CMS[i], alpha_T_CMS[i]);

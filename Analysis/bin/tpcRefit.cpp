@@ -145,7 +145,7 @@ std::tuple<double, double, double, double> get2DLine(  TVector3 aStart,  TVector
   if(aDir==2){
     start2D += 4*referencePoint;
     end2D += 4*referencePoint;
-    offset = 6;
+    offset = -29;
   }
   
   int startY = myGeometryPtr->Cartesian2posUVW(start2D, aDir, err_flag)*directionScale + offset;
@@ -213,12 +213,12 @@ int reFit(std::unique_ptr<EventSourceGRAW>& myEventSource, std::string geomFileN
     //oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo//
     //oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo//
 
-   // int nbinsU = UHist2D->GetNbinsY();
+    int nbinsU = UHist2D->GetNbinsY();
  //   int nbinsV = VHist2D->GetNbinsY();
-   // i//nt nbinsW = 1*WHist2D->GetNbinsY();
+    int nbinsW = WHist2D->GetNbinsY();
 
-    TCanvas *canvas1 = new TCanvas("canvas1","canvas1",1200,800);
-    canvas1->Divide(3,2);
+    TCanvas *canvas1 = new TCanvas("canvas1","canvas1",1600,600);
+    canvas1->Divide(3,1);
 	UHist2D->SetStats(0);
 	VHist2D->SetStats(0);
 	WHist2D->SetStats(0);
@@ -232,9 +232,9 @@ int reFit(std::unique_ptr<EventSourceGRAW>& myEventSource, std::string geomFileN
 	std::tie(U_X_vert, U_Y_vert, U_X_a1_end, U_Y_a1_end) = get2DLine(vertexPos,a1_end, 0, myGeometryPtr);
 	std::tie(U_X_vert, U_Y_vert, U_X_a2_end, U_Y_a2_end) = get2DLine(vertexPos,a2_end, 0, myGeometryPtr);
 	std::tie(U_X_vert, U_Y_vert, U_X_a3_end, U_Y_a3_end) = get2DLine(vertexPos,a3_end, 0, myGeometryPtr);
-	uLine1.DrawLine( U_X_vert,   U_Y_vert,  U_X_a1_end,  U_Y_a1_end);
-	uLine2.DrawLine( U_X_vert,   U_Y_vert,  U_X_a2_end,  U_Y_a2_end);
-	uLine3.DrawLine( U_X_vert,   U_Y_vert,  U_X_a3_end,  U_Y_a3_end);
+	uLine1.DrawLine( U_X_vert,  nbinsU- U_Y_vert,  U_X_a1_end, nbinsU- U_Y_a1_end);
+	uLine2.DrawLine( U_X_vert,  nbinsU- U_Y_vert,  U_X_a2_end, nbinsU- U_Y_a2_end);
+	uLine3.DrawLine( U_X_vert,  nbinsU- U_Y_vert,  U_X_a3_end, nbinsU- U_Y_a3_end);
 
     // std::cout<<U_X_vert<<" , "<<U_Y_vert<<"   "<<U_X_a1_end<<" ,  "<<U_Y_a1_end<<std::endl;
     // std::cout<<U_X_vert<<" , "<<U_Y_vert<<"   "<<U_X_a2_end<<" ,  "<<U_Y_a2_end<<std::endl;
@@ -255,30 +255,11 @@ int reFit(std::unique_ptr<EventSourceGRAW>& myEventSource, std::string geomFileN
 	std::tie(W_X_vert, W_Y_vert, W_X_a1_end, W_Y_a1_end) = get2DLine(vertexPos,a1_end, 2, myGeometryPtr);
 	std::tie(W_X_vert, W_Y_vert, W_X_a2_end, W_Y_a2_end) = get2DLine(vertexPos,a2_end, 2, myGeometryPtr);
 	std::tie(W_X_vert, W_Y_vert, W_X_a3_end, W_Y_a3_end) = get2DLine(vertexPos,a3_end, 2, myGeometryPtr);
-	wLine1.DrawLine(W_X_vert, (W_Y_vert)  ,  W_X_a1_end, (W_Y_a1_end) );
-	wLine2.DrawLine(W_X_vert, (W_Y_vert)  ,  W_X_a2_end, (W_Y_a2_end) );
-	wLine3.DrawLine(W_X_vert, (W_Y_vert)  ,  W_X_a3_end, (W_Y_a3_end) );
+	wLine1.DrawLine(W_X_vert, nbinsW-(W_Y_vert)  ,  W_X_a1_end, nbinsW-(W_Y_a1_end) );
+	wLine2.DrawLine(W_X_vert, nbinsW-(W_Y_vert)  ,  W_X_a2_end, nbinsW-(W_Y_a2_end) );
+	wLine3.DrawLine(W_X_vert, nbinsW-(W_Y_vert)  ,  W_X_a3_end, nbinsW-(W_Y_a3_end) );
 	//oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo//
 	//oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo//
-
-    canvas1->cd(4);
-    UHist2D->Draw("colz2 0");
-	uLine1.DrawLine( U_X_vert,   U_Y_vert,  U_X_a1_end,  U_Y_a1_end);
-	uLine2.DrawLine( U_X_vert,   U_Y_vert,  U_X_a2_end,  U_Y_a2_end);
-	uLine3.DrawLine( U_X_vert,   U_Y_vert,  U_X_a3_end,  U_Y_a3_end);
-
-    canvas1->cd(5);
-    VHist2D->Draw("colz2 0");
-	vLine1.DrawLine(V_X_vert, V_Y_vert, V_X_a1_end, V_Y_a1_end);
-	vLine2.DrawLine(V_X_vert, V_Y_vert, V_X_a2_end, V_Y_a2_end);
-	vLine3.DrawLine(V_X_vert, V_Y_vert, V_X_a3_end, V_Y_a3_end);
-
-
-    canvas1->cd(6);
-    WHist2D->Draw("colz2 0");
-	wLine1.DrawLine(W_X_vert, (W_Y_vert)  ,  W_X_a1_end, (W_Y_a1_end) );
-	wLine2.DrawLine(W_X_vert, (W_Y_vert)  ,  W_X_a2_end, (W_Y_a2_end) );
-	wLine3.DrawLine(W_X_vert, (W_Y_vert)  ,  W_X_a3_end, (W_Y_a3_end) );
 
 
 
@@ -307,7 +288,7 @@ int reFit(std::unique_ptr<EventSourceGRAW>& myEventSource, std::string geomFileN
 // oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo //
 // oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo //
 
-/*
+
 int main(int argc, char **argv){
 
 
@@ -350,7 +331,7 @@ int main(int argc, char **argv){
 
 	//==========================================================================================//
 
-    std::string inFile = "/home/kris/Desktop/ELI_fitter/prong3_out.csv";
+    std::string inFile = "/home/kris/Documents/ETPC/ELI_fitter/prong3_out.csv";
     auto data = read_csv(inFile); 
     int size = data.size();
     std::cout << "entries in file -> " << size << std::endl;
@@ -409,15 +390,14 @@ int main(int argc, char **argv){
 
 }
 
-*/
 
+
+/*
 int main(int argc, char **argv){
-	/*
-  	const double CONV_Kev2MeV = 1./1000.;
-	const double Q_VALUE_12C  = - 7367.0 * CONV_Kev2MeV; 
-
-	const double beamE = 13.1;// +0.12; // [MeV]
-	double Ecm = beamE + Q_VALUE_12C;// - (3);
+	
+	const double Q_VALUE_12C  = - 7.367;
+	const double beamE = 13.1;
+	double Ecm = beamE + Q_VALUE_12C; 
 
 
 	const double AMU        = 931.49410242;
@@ -430,6 +410,7 @@ int main(int argc, char **argv){
 
 	
 	IonRangeCalculator myRangeCalculator(gas_mixture_type::CO2, 250 ,293.15);
+	
 	double ionRangeMM  = myRangeCalculator.getIonRangeMM( pid_type::ALPHA ,KE_alpha0);
 
 	std::cout<<"==================="<<std::endl;
@@ -441,17 +422,16 @@ int main(int argc, char **argv){
 	std::cout<<"==================="<<std::endl;
 	std::cout<<"ion range a0    -> "<< ionRangeMM<<std::endl;
 	std::cout<<"==================="<<std::endl;
-*/
 
-	double aLen1  = 10.7535  ;
-	double aLen2  = 43.936 ;
-	double aLen3  = 30.6014 ;
-	IonRangeCalculator myRangeCalculator(gas_mixture_type::CO2, 250 ,293.15);
 
-	double E = myRangeCalculator.getIonEnergyMeV( pid_type::ALPHA ,aLen1 );
-	E += myRangeCalculator.getIonEnergyMeV( pid_type::ALPHA ,aLen2 );
-	E += myRangeCalculator.getIonEnergyMeV( pid_type::ALPHA ,aLen3 );
-	std::cout << "Total E -> "<< E <<std::endl;
-	std::cout << "Total D -> "<<aLen1+aLen2+aLen3 <<std::endl;
+	//double aLen1  = 10.7535  ;
+	//double aLen2  = 43.936 ;
+	//double aLen3  = 30.6014 ;
+	//IonRangeCalculator myRangeCalculator(gas_mixture_type::CO2, 250 ,293.15);
+	//double E = myRangeCalculator.getIonEnergyMeV( pid_type::ALPHA ,aLen1 );
+	//E += myRangeCalculator.getIonEnergyMeV( pid_type::ALPHA ,aLen2 );
+	//E += myRangeCalculator.getIonEnergyMeV( pid_type::ALPHA ,aLen3 );
+	//std::cout << "Total E -> "<< E <<std::endl;
+	//std::cout << "Total D -> "<<aLen1+aLen2+aLen3 <<std::endl;
 	
-}
+}*/
